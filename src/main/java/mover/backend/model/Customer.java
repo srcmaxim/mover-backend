@@ -17,8 +17,8 @@ import java.util.Set;
 @Entity
 @Table(name = "customer")
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = "leads")
+@ToString(callSuper = true, exclude = "leads")
 public class Customer extends Person {
     @OneToMany(mappedBy = "customer")
     @JsonIgnore

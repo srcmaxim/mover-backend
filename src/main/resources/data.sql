@@ -30,16 +30,16 @@ insert into lead_employee (lead_id, employee_id) values (5, 5);
 insert into lead_employee (lead_id, employee_id) values (6, 6);
 insert into lead_employee (lead_id, employee_id) values (7, 7);
 
-insert into lead_estimates (lead_id, description, quantity, price) values (1, 'Packing Paper', 1, 120);
-insert into lead_estimates (lead_id, description, quantity, price) values (1, 'Big Box', 3, 175);
-insert into lead_estimates (lead_id, description, quantity, price) values (2, 'Packing Stripe', 1, 100);
-insert into lead_estimates (lead_id, description, quantity, price) values (2, 'Small Box', 1, 125);
-insert into lead_estimates (lead_id, description, quantity, price) values (3, 'Velcro', 1, 10);
-insert into lead_estimates (lead_id, description, quantity, price) values (3, 'Big Box', 1, 200);
-insert into lead_estimates (lead_id, description, quantity, price) values (4, 'Small Box', 3, 125);
-insert into lead_estimates (lead_id, description, quantity, price) values (5, 'Packing Stripe', 3, 100);
-insert into lead_estimates (lead_id, description, quantity, price) values (6, 'Packing Stripe', 3, 100);
-insert into lead_estimates (lead_id, description, quantity, price) values (6, 'Small Box', 1, 125);
+insert into lead_estimates (lead_id, name, quantity, price) values (1, 'Packing Paper', 1, 120);
+insert into lead_estimates (lead_id, name, quantity, price) values (1, 'Big Box', 3, 175);
+insert into lead_estimates (lead_id, name, quantity, price) values (2, 'Packing Stripe', 1, 100);
+insert into lead_estimates (lead_id, name, quantity, price) values (2, 'Small Box', 1, 125);
+insert into lead_estimates (lead_id, name, quantity, price) values (3, 'Velcro', 1, 10);
+insert into lead_estimates (lead_id, name, quantity, price) values (3, 'Big Box', 1, 200);
+insert into lead_estimates (lead_id, name, quantity, price) values (4, 'Small Box', 3, 125);
+insert into lead_estimates (lead_id, name, quantity, price) values (5, 'Packing Stripe', 3, 100);
+insert into lead_estimates (lead_id, name, quantity, price) values (6, 'Packing Stripe', 3, 100);
+insert into lead_estimates (lead_id, name, quantity, price) values (6, 'Small Box', 1, 125);
 
 insert into lead_inventories (lead_id, category, name, quantity, weight, volume) values (1, 'DINNING', 'Table', 1, 20, 15);
 insert into lead_inventories (lead_id, category, name, quantity, weight, volume) values (3, 'KITCHEN', 'Fridge', 1, 100.50, 20);

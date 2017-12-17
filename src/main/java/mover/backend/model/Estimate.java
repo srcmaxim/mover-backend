@@ -14,8 +14,8 @@ import javax.validation.constraints.NotNull;
 @Data
 public class Estimate {
     @NotNull
-    @Column(name = "description", nullable = false)
-    private String description;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @NotNull
     @Column(name = "quantity", nullable = false)

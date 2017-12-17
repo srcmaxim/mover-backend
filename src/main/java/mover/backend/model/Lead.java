@@ -2,6 +2,7 @@ package mover.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.ToString;
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
 
@@ -17,6 +18,7 @@ import java.util.Set;
 @Entity
 @Table(name = "lead")
 @Data
+@ToString(exclude = {"customer", "assignedTos"})
 public class Lead {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,7 +65,6 @@ public class Lead {
     private Set<Inventory> inventories = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(unique = true)
     @JsonIgnore
     private Customer customer;
 
