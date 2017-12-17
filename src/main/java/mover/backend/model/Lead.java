@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A Lead.
+ * A lead represents a route from origin to destination in a specific time.
  */
 @Entity
 @Table(name = "lead")

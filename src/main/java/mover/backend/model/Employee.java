@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A Employee.
+ * A Employee represents a person who works in the company.
  */
 @Entity
 @Table(name = "employee")

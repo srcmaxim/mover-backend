@@ -7,7 +7,8 @@ import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 
 /**
- * A Estimate.
+ * A Estimate represents additional products used in single Lead.
+ * For example: Big box, Packing tape.
  */
 @Embeddable
 @Data

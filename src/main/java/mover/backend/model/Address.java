@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * A Address.
+ * A Address represents address in string format and also longitude and latitude of it.
  */
 @Embeddable
 @Data

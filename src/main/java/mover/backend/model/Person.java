@@ -5,6 +5,9 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+/**
+ * A Person represents basic information about Customer or Employee.
+ */
 @MappedSuperclass
 @Data
 public class Person {

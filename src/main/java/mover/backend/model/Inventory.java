@@ -10,7 +10,7 @@ import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 
 /**
- * A Inventory.
+ * A Inventory represents goods that moved in single Lead.
  */
 @Embeddable
 @Data
