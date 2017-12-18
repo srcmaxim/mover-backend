@@ -1,10 +1,11 @@
 package mover.backend.repository;
 
 import mover.backend.model.Customer;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * Spring Data JPA repository for the Customer entity.
  */
-public interface CustomerRepository extends CrudRepository<Customer, Long> {
+@Repository
+public interface CustomerRepository extends BaseReposetory<Customer, Long> {
 }
