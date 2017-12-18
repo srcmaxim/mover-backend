@@ -1,8 +1,8 @@
 package mover.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.Accessors;
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
 
@@ -18,7 +18,11 @@ import java.util.Set;
 @Entity
 @Table(name = "lead")
 @Data
-@ToString(exclude = {"customer", "assignedTos"})
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
+@ToString(exclude = {"estimates","inventories", "customer", "assignedTos"})
+@EqualsAndHashCode(exclude = {"id", "estimates","inventories", "customer", "assignedTos"})
 public class Lead {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

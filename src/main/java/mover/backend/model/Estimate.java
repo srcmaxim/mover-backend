@@ -1,6 +1,10 @@
 package mover.backend.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -12,6 +16,10 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
+@EqualsAndHashCode(of = "name")
 public class Estimate {
     @NotNull
     @Column(name = "name", nullable = false)
@@ -19,9 +27,9 @@ public class Estimate {
 
     @NotNull
     @Column(name = "quantity", nullable = false)
-    private Integer quantity;
+    private int quantity;
 
     @NotNull
     @Column(name = "price", nullable = false)
-    private Integer price;
+    private int price;
 }

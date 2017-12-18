@@ -1,8 +1,12 @@
 package mover.backend.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -11,6 +15,9 @@ import java.io.Serializable;
  */
 @Embeddable
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public class Address implements Serializable {
     @NotNull
     @Column(name = "address", nullable = false)
@@ -18,9 +25,9 @@ public class Address implements Serializable {
 
     @NotNull
     @Column(name = "longitude", nullable = false)
-    private String longitude;
+    private Double longitude;
 
     @NotNull
     @Column(name = "latitude", nullable = false)
-    private String latitude;
+    private Double latitude;
 }
