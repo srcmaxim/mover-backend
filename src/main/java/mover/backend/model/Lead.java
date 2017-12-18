@@ -3,6 +3,7 @@ package mover.backend.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.Accessors;
+import mover.backend.annotation.DateRange;
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
 
@@ -23,6 +24,7 @@ import java.util.Set;
 @Accessors(chain = true)
 @ToString(exclude = {"estimates","inventories", "customer", "assignedTos"})
 @EqualsAndHashCode(exclude = {"id", "estimates","inventories", "customer", "assignedTos"})
+@DateRange(before = "start", after = "end")
 public class Lead {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,6 +49,7 @@ public class Lead {
     private Status status;
 
     @Embedded
+    @NotNull
     @AttributeOverrides({
             @AttributeOverride(name = "address", column = @Column(name = "origin_address")),
             @AttributeOverride(name = "longitude", column = @Column(name = "origin_longitude")),
@@ -55,6 +58,7 @@ public class Lead {
     private Address origin;
 
     @Embedded
+    @NotNull
     @AttributeOverrides({
             @AttributeOverride(name = "address", column = @Column(name = "destination_address")),
             @AttributeOverride(name = "longitude", column = @Column(name = "destination_longitude")),

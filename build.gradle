@@ -12,6 +12,12 @@ buildscript {
 	}
 }
 
+tasks.withType(Test) {
+	testLogging {
+		events "started", "passed", "skipped", "failed"
+	}
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
