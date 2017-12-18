@@ -2,10 +2,12 @@ package mover.backend.model;
 
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
+import mover.backend.web.rest.TestUtil;
 import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -92,5 +94,19 @@ public class LeadTest {
         Set<ConstraintViolation<Lead>> validate = validator.validate(lead);
 
         assertThat(validate).hasSize(2);
+    }
+
+    @Test
+    @Transactional
+    public void equalsHashcodeVerifier() throws Exception {
+        TestUtil.equalsAndHashcodeVerifier(
+                lead, newLead(), newLead(), newLead());
+    }
+
+    private Lead newLead() {
+        return new Lead()
+                .setStart(START).setEnd(AFTER_END)
+                .setType(Type.DISTANCE).setStatus(Status.ASSIGNED)
+                .setOrigin(new Address()).setDestination(new Address());
     }
 }
