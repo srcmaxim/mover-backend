@@ -6,6 +6,7 @@ import mover.backend.model.Lead;
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
 import mover.backend.repository.LeadRepository;
+import mover.backend.web.rest.error.ExceptionAdvice;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,10 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.List;
 
 import static mover.backend.web.rest.TestUtil.sameInstant;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,10 +41,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class LeadResourceIntTest {
 
     private static final ZonedDateTime DEFAULT_START = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_START = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final ZonedDateTime UPDATED_START = ZonedDateTime.ofInstant(Instant.ofEpochMilli(10L), ZoneOffset.UTC);
 
-    private static final ZonedDateTime DEFAULT_END = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_END = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final ZonedDateTime DEFAULT_END = ZonedDateTime.ofInstant(Instant.ofEpochMilli(100L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_END = ZonedDateTime.ofInstant(Instant.ofEpochMilli(1000L), ZoneOffset.UTC);
 
     private static final Type DEFAULT_TYPE = Type.LOCAL;
     private static final Type UPDATED_TYPE = Type.DISTANCE;
@@ -66,6 +65,9 @@ public class LeadResourceIntTest {
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Autowired
+    private ExceptionAdvice exceptionTranslator;
+
+    @Autowired
     private EntityManager em;
 
     private MockMvc restLeadMockMvc;
@@ -77,6 +79,7 @@ public class LeadResourceIntTest {
         MockitoAnnotations.initMocks(this);
         LeadResource leadResource = new LeadResource(leadRepository);
         this.restLeadMockMvc = MockMvcBuilders.standaloneSetup(leadResource)
+                .setControllerAdvice(exceptionTranslator)
                 .setMessageConverters(jacksonMessageConverter).build();
     }
 
@@ -86,7 +89,7 @@ public class LeadResourceIntTest {
      * This is a static method, as tests for other entities might also need it,
      * if they test an entity which requires the current entity.
      */
-    public static Lead createEntity(EntityManager em) {
+    public static Lead createEntity() {
         Lead lead = new Lead()
                 .setStart(DEFAULT_START)
                 .setEnd(DEFAULT_END)
@@ -97,16 +100,30 @@ public class LeadResourceIntTest {
         return lead;
     }
 
+    public Lead getLastLead() {
+        return (Lead) em.createQuery("select l from Lead l order by l.id desc")
+                .setMaxResults(1).getSingleResult();
+    }
+
+    public int getCount() {
+        return (int) leadRepository.count();
+    }
+
+    public void saveAndFlush(Lead lead) {
+        em.persist(lead);
+        em.flush();
+    }
+
     @Before
     public void initTest() {
-        lead = createEntity(em);
+        lead = createEntity();
     }
 
     @Test
     @Transactional
     public void queryLeads() throws Exception {
-        // Initialize the database
-        leadRepository.saveAndFlush(lead);
+         // Initialize the database
+        saveAndFlush(lead);
 
         // Get all the leadList
         restLeadMockMvc.perform(get("/api/leads"))
@@ -124,7 +141,7 @@ public class LeadResourceIntTest {
     @Test
     @Transactional
     public void createLead() throws Exception {
-        long databaseSizeBeforeCreate = leadRepository.count();
+        int databaseSizeBeforeCreate = getCount();
 
         // Create the Lead
         restLeadMockMvc.perform(post("/api/leads")
@@ -133,9 +150,8 @@ public class LeadResourceIntTest {
                 .andExpect(status().isCreated());
 
         // Validate the Lead in the database
-        List<Lead> leadList = leadRepository.findAllByOrderByIdAsc();
-        assertThat(leadList).hasSize((int) (databaseSizeBeforeCreate + 1));
-        Lead testLead = leadList.get(leadList.size() - 1);
+        assertThat(getCount()).isEqualTo(databaseSizeBeforeCreate + 1);
+        Lead testLead = getLastLead();
         assertThat(testLead.getType()).isEqualTo(DEFAULT_TYPE);
         assertThat(testLead.getStart()).isEqualTo(DEFAULT_START);
         assertThat(testLead.getEnd()).isEqualTo(DEFAULT_END);
@@ -147,7 +163,7 @@ public class LeadResourceIntTest {
     @Test
     @Transactional
     public void createLeadWithExistingId() throws Exception {
-        long databaseSizeBeforeCreate = leadRepository.count();
+        int databaseSizeBeforeCreate = getCount();
 
         // Create the Lead with an existing ID
         lead.setId(1L);
@@ -158,18 +174,18 @@ public class LeadResourceIntTest {
                 .content(TestUtil.convertObjectToJsonBytes(lead)))
                 .andExpect(status().isBadRequest());
 
-        long databaseSizeAfterCreate = leadRepository.count();
-        assertThat(databaseSizeAfterCreate).isEqualTo(databaseSizeBeforeCreate);
+        assertThat(getCount()).isEqualTo(databaseSizeBeforeCreate);
     }
 
     @Test
     @Transactional
     public void createNotValidLead() throws Exception {
-        long databaseSizeBeforeCreate = leadRepository.count();
-        // set the fields where end < start
+        int databaseSizeBeforeCreate = getCount();
+
+        // Set the fields where end < start
         lead
-            .setStart(DEFAULT_END)
-            .setEnd(DEFAULT_START);
+                .setStart(DEFAULT_END)
+                .setEnd(DEFAULT_START);
 
         // Create the lead, which fails.
         restLeadMockMvc.perform(post("/api/leads")
@@ -177,16 +193,16 @@ public class LeadResourceIntTest {
                 .content(TestUtil.convertObjectToJsonBytes(lead)))
                 .andExpect(status().isBadRequest());
 
-        long databaseSizeAfterCreate = leadRepository.count();
-        assertThat(databaseSizeAfterCreate).isEqualTo(databaseSizeBeforeCreate);
+        assertThat(getCount()).isEqualTo(databaseSizeBeforeCreate);
     }
 
     @Test
     @Transactional
     public void updateLead() throws Exception {
-        // Initialize the database
-        leadRepository.saveAndFlush(lead);
-        long databaseSizeBeforeUpdate = leadRepository.count();
+         // Initialize the database
+        saveAndFlush(lead);
+
+        int databaseSizeBeforeUpdate = getCount();
 
         // Update the lead
         Lead updatedLead = leadRepository.findById(lead.getId()).get();
@@ -204,42 +220,39 @@ public class LeadResourceIntTest {
                 .andExpect(status().isOk());
 
         // Validate the Lead in the database
-        List<Lead> leadList = leadRepository.findAllByOrderByIdAsc();
-        assertThat(leadList).hasSize((int) databaseSizeBeforeUpdate);
-        Lead testLead = leadList.get(leadList.size() - 1);
+        assertThat(getCount()).isEqualTo(databaseSizeBeforeUpdate);
+        Lead testLead = getLastLead();
         assertThat(testLead.getStart()).isEqualTo(UPDATED_START);
         assertThat(testLead.getEnd()).isEqualTo(UPDATED_END);
         assertThat(testLead.getType()).isEqualTo(UPDATED_TYPE);
         assertThat(testLead.getStatus()).isEqualTo(UPDATED_STATUS);
-        assertThat(testLead.getOrigin()).isEqualTo(DEFAULT_ORIGIN);
-        assertThat(testLead.getDestination()).isEqualTo(DEFAULT_DESTINATION);
+        assertThat(testLead.getOrigin()).isEqualTo(UPDATED_ORIGIN);
+        assertThat(testLead.getDestination()).isEqualTo(UPDATED_DESTINATION);
     }
 
     @Test
     @Transactional
     public void updateNotValidLead() throws Exception {
         // Initialize the database
-        leadRepository.saveAndFlush(lead);
-        long databaseSizeBeforeUpdate = leadRepository.count();
+        saveAndFlush(lead);
+        em.detach(lead);
 
-        // Update the lead, which fails.
-        Lead updatedLead = leadRepository.findById(lead.getId()).get();
+        int databaseSizeBeforeUpdate = getCount();
 
-        // set the fields where end < start
-        updatedLead
-            .setStart(DEFAULT_END)
-            .setEnd(DEFAULT_START);
+        // Set the fields where end < start
+        lead
+                .setStart(DEFAULT_END)
+                .setEnd(DEFAULT_START);
 
         // update lead witch fails
         restLeadMockMvc.perform(put("/api/leads")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
-                .content(TestUtil.convertObjectToJsonBytes(updatedLead)))
+                .content(TestUtil.convertObjectToJsonBytes(lead)))
                 .andExpect(status().isBadRequest());
 
         // Validate the Lead in the database
-        List<Lead> leadList = leadRepository.findAllByOrderByIdAsc();
-        assertThat(leadList).hasSize((int) databaseSizeBeforeUpdate);
-        Lead testLead = leadList.get(leadList.size() - 1);
+        assertThat(getCount()).isEqualTo(databaseSizeBeforeUpdate);
+        Lead testLead = getLastLead();
         assertThat(testLead.getStart()).isEqualTo(DEFAULT_START);
         assertThat(testLead.getEnd()).isEqualTo(DEFAULT_END);
     }
@@ -247,27 +260,25 @@ public class LeadResourceIntTest {
     @Test
     @Transactional
     public void updateNonExistingLead() throws Exception {
-        long databaseSizeBeforeUpdate = leadRepository.count();
+        int databaseSizeBeforeUpdate = getCount();
 
         // Non existing Lead
         lead.setId(Long.MAX_VALUE);
 
-        // If the entity doesn't have an ID, it will be created instead of just being updated
+        // update with unexisting ID fails
         restLeadMockMvc.perform(put("/api/leads")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
                 .content(TestUtil.convertObjectToJsonBytes(lead)))
                 .andExpect(status().isNotFound());
 
-        // Validate the Lead in the database
-        List<Lead> leadList = leadRepository.findAllByOrderByIdAsc();
-        assertThat(leadList).hasSize((int) (databaseSizeBeforeUpdate));
+        assertThat(getCount()).isEqualTo(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
     public void findLead() throws Exception {
-        // Initialize the database
-        leadRepository.saveAndFlush(lead);
+         // Initialize the database
+        saveAndFlush(lead);
 
         // Get the lead
         restLeadMockMvc.perform(get("/api/leads/{id}", lead.getId()))
@@ -278,8 +289,8 @@ public class LeadResourceIntTest {
                 .andExpect(jsonPath("$.start").value(sameInstant(DEFAULT_START)))
                 .andExpect(jsonPath("$.end").value(sameInstant(DEFAULT_END)))
                 .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
-                .andExpect(jsonPath("$.origin.address").value(hasItem(DEFAULT_ORIGIN.getAddress())))
-                .andExpect(jsonPath("$.destination.address").value(hasItem(DEFAULT_DESTINATION.getAddress())));
+                .andExpect(jsonPath("$.origin.address").value(DEFAULT_ORIGIN.getAddress()))
+                .andExpect(jsonPath("$.destination.address").value(DEFAULT_DESTINATION.getAddress()));
     }
 
     @Test
@@ -293,9 +304,10 @@ public class LeadResourceIntTest {
     @Test
     @Transactional
     public void deleteLead() throws Exception {
-        // Initialize the database
-        leadRepository.saveAndFlush(lead);
-        long databaseSizeBeforeDelete = leadRepository.count();
+         // Initialize the database
+        saveAndFlush(lead);
+
+        int databaseSizeBeforeDelete = getCount();
 
         // Get the lead
         restLeadMockMvc.perform(delete("/api/leads/{id}", lead.getId())
@@ -303,14 +315,13 @@ public class LeadResourceIntTest {
                 .andExpect(status().isOk());
 
         // Validate the database is empty
-        List<Lead> leadList = leadRepository.findAllByOrderByIdAsc();
-        assertThat(leadList).hasSize((int) (databaseSizeBeforeDelete - 1));
+        assertThat(getCount()).isEqualTo(databaseSizeBeforeDelete - 1);
     }
 
     @Test
     @Transactional
     public void deleteNonExistingLead() throws Exception {
-        long databaseSizeBeforeDelete = leadRepository.count();
+        int databaseSizeBeforeDelete = getCount();
 
         // Get the lead
         restLeadMockMvc.perform(delete("/api/leads/{id}", Long.MAX_VALUE)
@@ -318,7 +329,6 @@ public class LeadResourceIntTest {
                 .andExpect(status().isOk());
 
         // Validate the database is empty
-        List<Lead> leadList = leadRepository.findAllByOrderByIdAsc();
-        assertThat(leadList).hasSize((int) (databaseSizeBeforeDelete));
+        assertThat(getCount()).isEqualTo(databaseSizeBeforeDelete);
     }
 }

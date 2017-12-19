@@ -2,6 +2,7 @@ package mover.backend.web.rest;
 
 import mover.backend.model.Lead;
 import mover.backend.repository.LeadRepository;
+import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 /**
  * REST controller for managing Lead.
@@ -37,7 +40,9 @@ public class LeadResource {
      */
     @GetMapping("/leads")
     public Iterable<Lead> queryLeads() {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to get all Leads");
+        Iterable<Lead> leads = leadRepository.findAll();
+        return leads;
     }
 
     /**
@@ -50,7 +55,13 @@ public class LeadResource {
      */
     @PostMapping("/leads")
     public ResponseEntity<Lead> createLead(@Valid @RequestBody Lead lead) throws URISyntaxException {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to save Lead : {}", lead);
+        if (lead.getId() != null) {
+            return ResponseEntity.badRequest().build();
+        }
+        Lead result = leadRepository.save(lead);
+        return ResponseEntity.created(new URI("/api/leads/" + result.getId()))
+                .body(result);
     }
 
     /**
@@ -64,7 +75,12 @@ public class LeadResource {
      */
     @PutMapping("/leads")
     public ResponseEntity<Lead> updateLead(@Valid @RequestBody Lead lead) throws URISyntaxException {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to update Lead : {}", lead);
+        if (lead.getId() != null && leadRepository.existsById(lead.getId())) {
+            leadRepository.save(lead);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
     /**
@@ -76,7 +92,9 @@ public class LeadResource {
      */
     @GetMapping("/leads/{id}")
     public ResponseEntity<Lead> findLead(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to get Lead : {}", id);
+        Optional<Lead> lead = leadRepository.findById(id);
+        return ResponseUtil.wrapOrNotFound(lead);
     }
 
     /**
@@ -87,8 +105,11 @@ public class LeadResource {
      */
     @DeleteMapping("/leads/{id}")
     public ResponseEntity<Void> deleteLead(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to delete Lead : {}", id);
+        if (id != null && leadRepository.existsById(id)) {
+            leadRepository.deleteById(id);
+        }
+        return ResponseEntity.ok().build();
     }
-
 }
 
