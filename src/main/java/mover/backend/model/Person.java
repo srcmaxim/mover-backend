@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 /**
  * A Person represents basic information about Customer or Employee.
@@ -19,18 +20,24 @@ import javax.validation.constraints.NotNull;
 @Accessors(chain = true)
 @EqualsAndHashCode(exclude = "id")
 public class Person {
+
+    private static final String EMAIL_PATTERN =
+            "[A-z0-9]+(\\-[A-z0-9]+|\\.[A-z0-9]+|\\_[A-z0-9]+)*@[A-z0-9]{2,}(\\.[A-z]{2,})+";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
     @Column(name = "firstname", nullable = false)
-    private String firstname;
+    private String firstName;
 
     @NotNull
     @Column(name = "lastname", nullable = false)
-    private String lastname;
+    private String lastName;
 
+    @NotNull
+    @Pattern(regexp = EMAIL_PATTERN)
     @Column(name = "email")
     private String email;
 
