@@ -2,6 +2,7 @@ package mover.backend.web.rest;
 
 import mover.backend.model.Employee;
 import mover.backend.repository.EmployeeRepository;
+import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 /**
  * REST controller for managing Employee.
@@ -37,7 +40,9 @@ public class EmployeeResource {
      */
     @GetMapping("/employees")
     public Iterable<Employee> queryEmployees() {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to get all Employees");
+        Iterable<Employee> employees = employeeRepository.findAll();
+        return employees;
     }
 
     /**
@@ -50,7 +55,13 @@ public class EmployeeResource {
      */
     @PostMapping("/employees")
     public ResponseEntity<Employee> createEmployee(@Valid @RequestBody Employee employee) throws URISyntaxException {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to save Employee : {}", employee);
+        if (employee.getId() != null) {
+            return ResponseEntity.badRequest().build();
+        }
+        Employee result = employeeRepository.save(employee);
+        return ResponseEntity.created(new URI("/api/employees/" + result.getId()))
+                .body(result);
     }
 
     /**
@@ -64,7 +75,12 @@ public class EmployeeResource {
      */
     @PutMapping("/employees")
     public ResponseEntity<Employee> updateEmployee(@Valid @RequestBody Employee employee) throws URISyntaxException {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to update Employee : {}", employee);
+        if (employee.getId() != null && employeeRepository.existsById(employee.getId())) {
+            employeeRepository.save(employee);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
     /**
@@ -76,7 +92,9 @@ public class EmployeeResource {
      */
     @GetMapping("/employees/{id}")
     public ResponseEntity<Employee> findEmployee(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to get Employee : {}", id);
+        Optional<Employee> employee = employeeRepository.findById(id);
+        return ResponseUtil.wrapOrNotFound(employee);
     }
 
     /**
@@ -87,7 +105,11 @@ public class EmployeeResource {
      */
     @DeleteMapping("/employees/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to delete Employee : {}", id);
+        if (id != null && employeeRepository.existsById(id)) {
+            employeeRepository.deleteById(id);
+        }
+        return ResponseEntity.ok().build();
     }
 }
 
