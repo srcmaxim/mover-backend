@@ -2,6 +2,7 @@ package mover.backend.web.rest;
 
 import mover.backend.model.Customer;
 import mover.backend.repository.CustomerRepository;
+import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 /**
  * REST controller for managing Customer.
@@ -37,7 +40,9 @@ public class CustomerResource {
      */
     @GetMapping("/customers")
     public Iterable<Customer> queryCustomers() {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to get all Customers");
+        Iterable<Customer> customers = customerRepository.findAll();
+        return customers;
     }
 
     /**
@@ -50,7 +55,13 @@ public class CustomerResource {
      */
     @PostMapping("/customers")
     public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) throws URISyntaxException {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to save Customer : {}", customer);
+        if (customer.getId() != null) {
+            return ResponseEntity.badRequest().build();
+        }
+        Customer result = customerRepository.save(customer);
+        return ResponseEntity.created(new URI("/api/customers/" + result.getId()))
+                .body(result);
     }
 
     /**
@@ -64,7 +75,12 @@ public class CustomerResource {
      */
     @PutMapping("/customers")
     public ResponseEntity<Customer> updateCustomer(@Valid @RequestBody Customer customer) throws URISyntaxException {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to update Customer : {}", customer);
+        if (customer.getId() != null && customerRepository.existsById(customer.getId())) {
+            customerRepository.save(customer);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
     /**
@@ -76,7 +92,9 @@ public class CustomerResource {
      */
     @GetMapping("/customers/{id}")
     public ResponseEntity<Customer> findCustomer(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to get Customer : {}", id);
+        Optional<Customer> customer = customerRepository.findById(id);
+        return ResponseUtil.wrapOrNotFound(customer);
     }
 
     /**
@@ -87,7 +105,11 @@ public class CustomerResource {
      */
     @DeleteMapping("/customers/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to delete Customer : {}", id);
+        if (id != null && customerRepository.existsById(id)) {
+            customerRepository.deleteById(id);
+        }
+        return ResponseEntity.ok().build();
     }
 }
 
