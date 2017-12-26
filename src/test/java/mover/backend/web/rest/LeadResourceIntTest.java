@@ -7,7 +7,8 @@ import mover.backend.model.Lead;
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
 import mover.backend.repository.LeadRepository;
-import mover.backend.web.rest.error.ExceptionAdvice;
+import mover.backend.web.rest.advice.ExceptionAdvice;
+import mover.backend.web.rest.advice.ValidatorAdvice;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +26,7 @@ import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -83,6 +85,9 @@ public class LeadResourceIntTest {
     private ExceptionAdvice exceptionTranslator;
 
     @Autowired
+    private ValidatorAdvice validatorTranslator;
+
+    @Autowired
     private EntityManager em;
 
     private MockMvc restLeadMockMvc;
@@ -95,6 +100,7 @@ public class LeadResourceIntTest {
         LeadResource leadResource = new LeadResource(leadRepository);
         this.restLeadMockMvc = MockMvcBuilders.standaloneSetup(leadResource)
                 .setControllerAdvice(exceptionTranslator)
+                .setControllerAdvice(validatorTranslator)
                 .setMessageConverters(jacksonMessageConverter).build();
     }
 
@@ -121,19 +127,12 @@ public class LeadResourceIntTest {
                 .setMaxResults(1).getSingleResult();
     }
 
-    @SuppressWarnings("unchecked")
-    private Iterable<Estimate> getLastLeadEstimates() {
-        return (Iterable<Estimate>) em.createQuery("select l.estimates from Lead l order by l.id desc")
-                .getResultList();
-    }
-
     public int getCount() {
         return (int) leadRepository.count();
     }
 
     public int getLastLeadCountEstimates() {
-        return (int) em.createQuery("select count(l.estimates) from Lead l order by l.id desc")
-                .setMaxResults(1).getSingleResult();
+        return getLastLead().getEstimates().size();
     }
 
     public void saveAndFlush(Lead lead) {
@@ -149,7 +148,7 @@ public class LeadResourceIntTest {
     @Test
     @Transactional
     public void queryLeads() throws Exception {
-         // Initialize the database
+        // Initialize the database
         saveAndFlush(lead);
 
         // Get all the leadList
@@ -226,7 +225,7 @@ public class LeadResourceIntTest {
     @Test
     @Transactional
     public void updateLead() throws Exception {
-         // Initialize the database
+        // Initialize the database
         saveAndFlush(lead);
 
         int databaseSizeBeforeUpdate = getCount();
@@ -304,7 +303,7 @@ public class LeadResourceIntTest {
     @Test
     @Transactional
     public void findLead() throws Exception {
-         // Initialize the database
+        // Initialize the database
         saveAndFlush(lead);
 
         // Get the lead
@@ -331,7 +330,7 @@ public class LeadResourceIntTest {
     @Test
     @Transactional
     public void deleteLead() throws Exception {
-         // Initialize the database
+        // Initialize the database
         saveAndFlush(lead);
 
         int databaseSizeBeforeDelete = getCount();
@@ -402,24 +401,18 @@ public class LeadResourceIntTest {
         int databaseSizeBeforeUpdate = getLastLeadCountEstimates();
 
         // Update the estimates of the lead
-        Iterable<Estimate> updatedEstimates = leadRepository.findEstimatesById(lead.getId());
+        Lead lead = leadRepository.findById(this.lead.getId()).get();
 
-        int i = 0;
-        for (Estimate updatedEstimate : updatedEstimates) {
-            updatedEstimate.setName(UPDATED_ESTIMATES.get(i).getName());
-            updatedEstimate.setQuantity(UPDATED_ESTIMATES.get(i).getQuantity());
-            updatedEstimate.setPrice(UPDATED_ESTIMATES.get(i).getPrice());
-            i++;
-        }
+        lead.setEstimates(new HashSet<>(UPDATED_ESTIMATES));
 
-        restLeadMockMvc.perform(put("/api/leads/{id}/estimates", lead.getId())
+        restLeadMockMvc.perform(put("/api/leads/{id}/estimates", this.lead.getId())
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
-                .content(TestUtil.convertObjectToJsonBytes(updatedEstimates)))
+                .content(TestUtil.convertObjectToJsonBytes(lead.getEstimates())))
                 .andExpect(status().isOk());
 
         // Validate the Estimates in the database
         assertThat(getLastLeadCountEstimates()).isEqualTo(databaseSizeBeforeUpdate);
-        Iterable<Estimate> testEstimates = getLastLeadEstimates();
+        Iterable<Estimate> testEstimates = getLastLead().getEstimates();
         assertThat(testEstimates).containsExactlyInAnyOrder((Estimate[]) UPDATED_ESTIMATES.toArray());
     }
 
@@ -432,12 +425,11 @@ public class LeadResourceIntTest {
 
         int databaseSizeBeforeUpdate = getLastLeadCountEstimates();
 
-        // Set the fields where params are null
-        for (Estimate estimate : lead.getEstimates()) {
-            estimate.setName(null);
-            estimate.setQuantity(0);
-            estimate.setPrice(0);
-        }
+        // Set the fields where params aren't valid
+        lead.setEstimates(new HashSet<>(asList(
+                new Estimate("", 0, 0),
+                new Estimate(null, -1, -1)
+        )));
 
 
         // update estimates witch fails
@@ -448,8 +440,8 @@ public class LeadResourceIntTest {
 
         // Validate the Lead in the database
         assertThat(getLastLeadCountEstimates()).isEqualTo(databaseSizeBeforeUpdate);
-        Iterable<Estimate> testEstimates = getLastLeadEstimates();
-        assertThat(testEstimates).containsExactlyInAnyOrder((Estimate[]) UPDATED_ESTIMATES.toArray());
+        Iterable<Estimate> testEstimates = getLastLead().getEstimates();
+        assertThat(testEstimates).containsExactlyInAnyOrder((Estimate[]) DEFAULT_ESTIMATES.toArray());
     }
 
     @Test

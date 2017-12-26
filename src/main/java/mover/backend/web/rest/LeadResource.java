@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * REST controller for managing Lead.
@@ -121,8 +121,11 @@ public class LeadResource {
      * or with status 404 (Not Found) if there is no lead with this ID
      */
     @GetMapping("/leads/{id}/estimates")
-    public Iterable<Estimate> findEstimates(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+    public  ResponseEntity<Iterable<Estimate>> findEstimates(@PathVariable Long id) {
+        log.debug("REST request to get Estimates of Lead: {}", id);
+        Optional<Iterable<Estimate>> estimates = leadRepository.findById(id)
+                .map(Lead::getEstimates);
+        return ResponseUtil.wrapOrNotFound(estimates);
     }
 
     /**
@@ -135,9 +138,17 @@ public class LeadResource {
      * or with status 404 (Not Found) if there is no lead with this ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PutMapping("/leads/{id}/estimates")
-    public ResponseEntity<Void> updateEstimates(@PathVariable Long id, @Valid @RequestBody Iterable<Estimate> estimates) throws URISyntaxException {
-        throw new UnsupportedOperationException();
+    @PutMapping("leads/{id}/estimates")
+    public ResponseEntity<Void> updateEstimates(@PathVariable Long id, @Valid @RequestBody Collection<Estimate> estimates) throws URISyntaxException {
+        log.debug("REST request to update Estimates of Lead: {}", id);
+        if (id != null && leadRepository.existsById(id)) {
+            HashSet<Estimate> newEstimates = new HashSet<>();
+            newEstimates.addAll(estimates);
+            leadRepository.findById(id)
+                    .ifPresent(lead -> lead.setEstimates(newEstimates));
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
 

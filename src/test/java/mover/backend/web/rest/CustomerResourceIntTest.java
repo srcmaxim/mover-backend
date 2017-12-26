@@ -3,7 +3,7 @@ package mover.backend.web.rest;
 import mover.backend.BackendApplication;
 import mover.backend.model.Customer;
 import mover.backend.repository.CustomerRepository;
-import mover.backend.web.rest.error.ExceptionAdvice;
+import mover.backend.web.rest.advice.ExceptionAdvice;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

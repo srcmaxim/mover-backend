@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Accessors(chain = true)
 @EqualsAndHashCode(of = "name")
-public class Estimate {
+public class Estimate implements Cloneable{
     @NotNull
     @Column(name = "name", nullable = false)
     private String name;

@@ -1,4 +1,4 @@
-package mover.backend.web.rest.error;
+package mover.backend.web.rest.advice;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
