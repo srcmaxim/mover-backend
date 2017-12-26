@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 import static mover.backend.web.rest.TestUtil.sameInstant;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,11 +40,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = BackendApplication.class)
 public class LeadResourceIntTest {
 
-    private static final ZonedDateTime DEFAULT_START = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_START = ZonedDateTime.ofInstant(Instant.ofEpochMilli(10L), ZoneOffset.UTC);
+    private static final LocalDateTime DEFAULT_START = LocalDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final LocalDateTime UPDATED_START = LocalDateTime.ofInstant(Instant.ofEpochMilli(10L), ZoneOffset.UTC);
 
-    private static final ZonedDateTime DEFAULT_END = ZonedDateTime.ofInstant(Instant.ofEpochMilli(100L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_END = ZonedDateTime.ofInstant(Instant.ofEpochMilli(1000L), ZoneOffset.UTC);
+    private static final LocalDateTime DEFAULT_END = LocalDateTime.ofInstant(Instant.ofEpochMilli(100L), ZoneOffset.UTC);
+    private static final LocalDateTime UPDATED_END = LocalDateTime.ofInstant(Instant.ofEpochMilli(1000L), ZoneOffset.UTC);
 
     private static final Type DEFAULT_TYPE = Type.LOCAL;
     private static final Type UPDATED_TYPE = Type.DISTANCE;

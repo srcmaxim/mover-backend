@@ -9,7 +9,7 @@ import mover.backend.model.enumeration.Type;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,11 +32,11 @@ public class Lead {
 
     @NotNull
     @Column(name = "start", nullable = false)
-    private ZonedDateTime start;
+    private LocalDateTime start;
 
     @NotNull
     @Column(name = "end", nullable = false)
-    private ZonedDateTime end;
+    private LocalDateTime end;
 
     @NotNull
     @Enumerated(EnumType.STRING)

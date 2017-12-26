@@ -16,7 +16,7 @@ import javax.validation.ValidatorFactory;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,9 +24,9 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 public class LeadTest {
 
-    private static final ZonedDateTime START = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime END = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
-    private static final ZonedDateTime AFTER_END = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.MAX_VALUE), ZoneOffset.UTC);
+    private static final LocalDateTime START = LocalDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final LocalDateTime END = LocalDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final LocalDateTime AFTER_END = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.MAX_VALUE), ZoneOffset.UTC);
     private static final Type TYPE = Type.LOCAL;
     private static final Status STATUS = Status.PENDING;
     private static final Address ADDRESS = new Address();
