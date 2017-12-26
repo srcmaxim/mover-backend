@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -25,11 +26,11 @@ public class Estimate {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @NotNull
+    @DecimalMin(value = "0", inclusive = false)
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @NotNull
+    @DecimalMin(value = "0", inclusive = false)
     @Column(name = "price", nullable = false)
     private int price;
 }

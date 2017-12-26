@@ -2,6 +2,7 @@ package mover.backend.web.rest;
 
 import mover.backend.BackendApplication;
 import mover.backend.model.Address;
+import mover.backend.model.Estimate;
 import mover.backend.model.Lead;
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
@@ -22,9 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 
+import static java.util.Arrays.asList;
 import static mover.backend.web.rest.TestUtil.sameInstant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -57,6 +60,18 @@ public class LeadResourceIntTest {
 
     private static final Address DEFAULT_DESTINATION = new Address("Default destination", 0D, 0D);
     private static final Address UPDATED_DESTINATION = new Address("Updated destination", 1D, 1D);
+
+    /* ESTIMATES */
+    private static final List<Estimate> DEFAULT_ESTIMATES = asList(
+            new Estimate("Default estimate 1", 1, 100),
+            new Estimate("Default estimate 2", 2, 200),
+            new Estimate("Default estimate 3", 3, 300)
+    );
+    private static final List<Estimate> UPDATED_ESTIMATES = asList(
+            new Estimate("Updated estimate 1", 1, 100),
+            new Estimate("Updated estimate 2", 2, 200),
+            new Estimate("Updated estimate 3", 3, 300)
+    );
 
     @Autowired
     private LeadRepository leadRepository;
@@ -97,6 +112,7 @@ public class LeadResourceIntTest {
                 .setStatus(DEFAULT_STATUS)
                 .setOrigin(DEFAULT_ORIGIN)
                 .setDestination(DEFAULT_DESTINATION);
+        lead.getEstimates().addAll(DEFAULT_ESTIMATES);
         return lead;
     }
 
@@ -105,8 +121,19 @@ public class LeadResourceIntTest {
                 .setMaxResults(1).getSingleResult();
     }
 
+    @SuppressWarnings("unchecked")
+    private Iterable<Estimate> getLastLeadEstimates() {
+        return (Iterable<Estimate>) em.createQuery("select l.estimates from Lead l order by l.id desc")
+                .getResultList();
+    }
+
     public int getCount() {
         return (int) leadRepository.count();
+    }
+
+    public int getLastLeadCountEstimates() {
+        return (int) em.createQuery("select count(l.estimates) from Lead l order by l.id desc")
+                .setMaxResults(1).getSingleResult();
     }
 
     public void saveAndFlush(Lead lead) {
@@ -330,5 +357,115 @@ public class LeadResourceIntTest {
 
         // Validate the database is empty
         assertThat(getCount()).isEqualTo(databaseSizeBeforeDelete);
+    }
+
+     /* ESTIMATES */
+
+    @Test
+    @Transactional
+    public void findEstimates() throws Exception {
+        // Initialize the database
+        saveAndFlush(lead);
+
+        // Get the estimates of the lead
+        restLeadMockMvc.perform(get("/api/leads/{id}/estimates", lead.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+
+                .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_ESTIMATES.get(0).getName())))
+                .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_ESTIMATES.get(0).getQuantity())))
+                .andExpect(jsonPath("$.[*].price").value(hasItem(DEFAULT_ESTIMATES.get(0).getPrice())))
+
+                .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_ESTIMATES.get(1).getName())))
+                .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_ESTIMATES.get(1).getQuantity())))
+                .andExpect(jsonPath("$.[*].price").value(hasItem(DEFAULT_ESTIMATES.get(1).getPrice())))
+
+                .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_ESTIMATES.get(2).getName())))
+                .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_ESTIMATES.get(2).getQuantity())))
+                .andExpect(jsonPath("$.[*].price").value(hasItem(DEFAULT_ESTIMATES.get(2).getPrice())));
+    }
+
+    @Test
+    @Transactional
+    public void findNonExistingEstimates() throws Exception {
+        // Get the estimates of the lead
+        restLeadMockMvc.perform(get("/api/leads/{id}/estimates", Long.MAX_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    public void updateEstimates() throws Exception {
+        // Initialize the database
+        saveAndFlush(lead);
+
+        int databaseSizeBeforeUpdate = getLastLeadCountEstimates();
+
+        // Update the estimates of the lead
+        Iterable<Estimate> updatedEstimates = leadRepository.findEstimatesById(lead.getId());
+
+        int i = 0;
+        for (Estimate updatedEstimate : updatedEstimates) {
+            updatedEstimate.setName(UPDATED_ESTIMATES.get(i).getName());
+            updatedEstimate.setQuantity(UPDATED_ESTIMATES.get(i).getQuantity());
+            updatedEstimate.setPrice(UPDATED_ESTIMATES.get(i).getPrice());
+            i++;
+        }
+
+        restLeadMockMvc.perform(put("/api/leads/{id}/estimates", lead.getId())
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(updatedEstimates)))
+                .andExpect(status().isOk());
+
+        // Validate the Estimates in the database
+        assertThat(getLastLeadCountEstimates()).isEqualTo(databaseSizeBeforeUpdate);
+        Iterable<Estimate> testEstimates = getLastLeadEstimates();
+        assertThat(testEstimates).containsExactlyInAnyOrder((Estimate[]) UPDATED_ESTIMATES.toArray());
+    }
+
+    @Test
+    @Transactional
+    public void updateNotValidEstimates() throws Exception {
+        // Initialize the database
+        saveAndFlush(lead);
+        em.detach(lead);
+
+        int databaseSizeBeforeUpdate = getLastLeadCountEstimates();
+
+        // Set the fields where params are null
+        for (Estimate estimate : lead.getEstimates()) {
+            estimate.setName(null);
+            estimate.setQuantity(0);
+            estimate.setPrice(0);
+        }
+
+
+        // update estimates witch fails
+        restLeadMockMvc.perform(put("/api/leads/{id}/estimates", lead.getId())
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(lead.getEstimates())))
+                .andExpect(status().isBadRequest());
+
+        // Validate the Lead in the database
+        assertThat(getLastLeadCountEstimates()).isEqualTo(databaseSizeBeforeUpdate);
+        Iterable<Estimate> testEstimates = getLastLeadEstimates();
+        assertThat(testEstimates).containsExactlyInAnyOrder((Estimate[]) UPDATED_ESTIMATES.toArray());
+    }
+
+    @Test
+    @Transactional
+    public void updateNonExistingEstimates() throws Exception {
+        int databaseSizeBeforeUpdate = getCount();
+
+        // Non existing Lead
+        lead.setId(Long.MAX_VALUE);
+
+        // update with unexisting ID fails
+        restLeadMockMvc.perform(put("/api/leads/{id}/estimates", lead.getId())
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(lead.getEstimates())))
+                .andExpect(status().isNotFound());
+
+        assertThat(getCount()).isEqualTo(databaseSizeBeforeUpdate);
     }
 }

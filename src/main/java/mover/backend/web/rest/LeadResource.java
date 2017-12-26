@@ -1,5 +1,6 @@
 package mover.backend.web.rest;
 
+import mover.backend.model.Estimate;
 import mover.backend.model.Lead;
 import mover.backend.repository.LeadRepository;
 import mover.backend.web.rest.util.ResponseUtil;
@@ -110,6 +111,33 @@ public class LeadResource {
             leadRepository.deleteById(id);
         }
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * GET  /leads/:id/estimates : Finds estimates in store by lead ID.
+     *
+     * @param id the ID of the estimates lead to return
+     * @return the ResponseEntity with status 200 (OK) and with body the estimates,
+     * or with status 404 (Not Found) if there is no lead with this ID
+     */
+    @GetMapping("/leads/{id}/estimates")
+    public Iterable<Estimate> findEstimates(@PathVariable Long id) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * PUT  /leads/:id/estimates  : Updates lead estimates in store by lead ID.
+     *
+     * @param id the ID of the estimates lead to update
+     * @param estimates  the estimates to update
+     * @return the ResponseEntity with status 200 (OK),
+     * or with status 400 (Bad Request) if the Estimates are not valid,
+     * or with status 404 (Not Found) if there is no lead with this ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PutMapping("/leads/{id}/estimates")
+    public ResponseEntity<Void> updateEstimates(@PathVariable Long id, @Valid @RequestBody Iterable<Estimate> estimates) throws URISyntaxException {
+        throw new UnsupportedOperationException();
     }
 }
 
