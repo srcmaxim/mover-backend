@@ -499,13 +499,11 @@ public class LeadResourceIntTest {
                 .andExpect(jsonPath("$.[*].weight").value(hasItem(DEFAULT_INVENTORIES.get(0).getWeight())))
                 .andExpect(jsonPath("$.[*].volume").value(hasItem(DEFAULT_INVENTORIES.get(0).getVolume())))
 
-
                 .andExpect(jsonPath("$.[*].category").value(hasItem(DEFAULT_INVENTORIES.get(1).getCategory().toString())))
                 .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_INVENTORIES.get(1).getName())))
                 .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_INVENTORIES.get(1).getQuantity())))
                 .andExpect(jsonPath("$.[*].weight").value(hasItem(DEFAULT_INVENTORIES.get(1).getWeight())))
                 .andExpect(jsonPath("$.[*].volume").value(hasItem(DEFAULT_INVENTORIES.get(1).getVolume())))
-
 
                 .andExpect(jsonPath("$.[*].category").value(hasItem(DEFAULT_INVENTORIES.get(2).getCategory().toString())))
                 .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_INVENTORIES.get(2).getName())))

@@ -163,7 +163,10 @@ public class LeadResource {
      */
     @GetMapping("/leads/{id}/inventories")
     public  ResponseEntity<Iterable<Inventory>> findInventories(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to get Inventories of Lead: {}", id);
+        Optional<Iterable<Inventory>> inventories = leadRepository.findById(id)
+                .map(Lead::getInventories);
+        return ResponseUtil.wrapOrNotFound(inventories);
     }
 
     /**
@@ -178,7 +181,15 @@ public class LeadResource {
      */
     @PutMapping("leads/{id}/inventories")
     public ResponseEntity<Void> updateINventories(@PathVariable Long id, @Valid @RequestBody Collection<Inventory> inventories) throws URISyntaxException {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to update Inventories of Lead: {}", id);
+        if (id != null && leadRepository.existsById(id)) {
+            HashSet<Inventory> newInventories = new HashSet<>();
+            newInventories.addAll(inventories);
+            leadRepository.findById(id)
+                    .ifPresent(lead -> lead.setInventories(newInventories));
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
 
