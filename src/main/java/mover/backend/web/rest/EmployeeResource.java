@@ -122,7 +122,10 @@ public class EmployeeResource {
      */
     @GetMapping("/employees/{id}/leads")
     public  ResponseEntity<Iterable<Lead>> findLeadsByEmployeeId(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to get Leads of Employee: {}", id);
+        Optional<Iterable<Lead>> leads = employeeRepository.findById(id)
+                .map(Employee::getLeads);
+        return ResponseUtil.wrapOrNotFound(leads);
     }
 }
 
