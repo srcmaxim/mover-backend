@@ -199,7 +199,10 @@ public class LeadResource {
      */
     @GetMapping("/leads/{id}/customer")
     public  ResponseEntity<Customer> findCustomerByLeadId(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to get Customer of Lead: {}", id);
+        Optional<Customer> customer = leadRepository.findById(id)
+                .map(Lead::getCustomer);
+        return ResponseUtil.wrapOrNotFound(customer);
     }
 
     /**
@@ -211,7 +214,10 @@ public class LeadResource {
      */
     @GetMapping("/leads/{id}/employees")
     public  ResponseEntity<Iterable<Employee>> findEmployeesByLeadId(@PathVariable Long id) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to get Employees of Lead: {}", id);
+        Optional<Iterable<Employee>> employees = leadRepository.findById(id)
+                .map(Lead::getAssignedTos);
+        return ResponseUtil.wrapOrNotFound(employees);
     }
 }
 
