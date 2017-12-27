@@ -3,7 +3,9 @@ package mover.backend.web.rest;
 import mover.backend.BackendApplication;
 import mover.backend.model.Address;
 import mover.backend.model.Estimate;
+import mover.backend.model.Inventory;
 import mover.backend.model.Lead;
+import mover.backend.model.enumeration.Category;
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
 import mover.backend.repository.LeadRepository;
@@ -75,6 +77,18 @@ public class LeadResourceIntTest {
             new Estimate("Updated estimate 3", 3, 300)
     );
 
+    /* INVENTORIES */
+    private static final List<Inventory> DEFAULT_INVENTORIES = asList(
+            new Inventory(Category.BED, "Default estimate 1", 1, 10,100),
+            new Inventory(Category.LIVING, "Default estimate 2", 2, 20,200),
+            new Inventory(Category.OFFICE, "Default estimate 3", 3, 30,300)
+    );
+    private static final List<Inventory> UPDATED_INVENTORIES = asList(
+            new Inventory(Category.BED, "Updated estimate 1", 1, 10,100),
+            new Inventory(Category.LIVING, "Updated estimate 2", 2, 20,200),
+            new Inventory(Category.OFFICE, "Updated estimate 3", 3, 30,300)
+    );
+
     @Autowired
     private LeadRepository leadRepository;
 
@@ -119,6 +133,7 @@ public class LeadResourceIntTest {
                 .setOrigin(DEFAULT_ORIGIN)
                 .setDestination(DEFAULT_DESTINATION);
         lead.getEstimates().addAll(DEFAULT_ESTIMATES);
+        lead.getInventories().addAll(DEFAULT_INVENTORIES);
         return lead;
     }
 
@@ -133,6 +148,10 @@ public class LeadResourceIntTest {
 
     public int getLastLeadCountEstimates() {
         return getLastLead().getEstimates().size();
+    }
+
+    private int getLastLeadCountInventories() {
+        return getLastLead().getInventories().size();
     }
 
     public void saveAndFlush(Lead lead) {
@@ -358,7 +377,7 @@ public class LeadResourceIntTest {
         assertThat(getCount()).isEqualTo(databaseSizeBeforeDelete);
     }
 
-     /* ESTIMATES */
+    /* ESTIMATES */
 
     @Test
     @Transactional
@@ -456,6 +475,118 @@ public class LeadResourceIntTest {
         restLeadMockMvc.perform(put("/api/leads/{id}/estimates", lead.getId())
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
                 .content(TestUtil.convertObjectToJsonBytes(lead.getEstimates())))
+                .andExpect(status().isNotFound());
+
+        assertThat(getCount()).isEqualTo(databaseSizeBeforeUpdate);
+    }
+
+    /* INVENTORIES */
+
+    @Test
+    @Transactional
+    public void findInventories() throws Exception {
+        // Initialize the database
+        saveAndFlush(lead);
+
+        // Get the inventories of the lead
+        restLeadMockMvc.perform(get("/api/leads/{id}/inventories", lead.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+
+                .andExpect(jsonPath("$.[*].category").value(hasItem(DEFAULT_INVENTORIES.get(0).getCategory().toString())))
+                .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_INVENTORIES.get(0).getName())))
+                .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_INVENTORIES.get(0).getQuantity())))
+                .andExpect(jsonPath("$.[*].weight").value(hasItem(DEFAULT_INVENTORIES.get(0).getWeight())))
+                .andExpect(jsonPath("$.[*].volume").value(hasItem(DEFAULT_INVENTORIES.get(0).getVolume())))
+
+
+                .andExpect(jsonPath("$.[*].category").value(hasItem(DEFAULT_INVENTORIES.get(1).getCategory().toString())))
+                .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_INVENTORIES.get(1).getName())))
+                .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_INVENTORIES.get(1).getQuantity())))
+                .andExpect(jsonPath("$.[*].weight").value(hasItem(DEFAULT_INVENTORIES.get(1).getWeight())))
+                .andExpect(jsonPath("$.[*].volume").value(hasItem(DEFAULT_INVENTORIES.get(1).getVolume())))
+
+
+                .andExpect(jsonPath("$.[*].category").value(hasItem(DEFAULT_INVENTORIES.get(2).getCategory().toString())))
+                .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_INVENTORIES.get(2).getName())))
+                .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_INVENTORIES.get(2).getQuantity())))
+                .andExpect(jsonPath("$.[*].weight").value(hasItem(DEFAULT_INVENTORIES.get(2).getWeight())))
+                .andExpect(jsonPath("$.[*].volume").value(hasItem(DEFAULT_INVENTORIES.get(2).getVolume())));
+
+    }
+
+    @Test
+    @Transactional
+    public void findNonExistingInventories() throws Exception {
+        // Get the inventories of the lead
+        restLeadMockMvc.perform(get("/api/leads/{id}/inventories", Long.MAX_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    public void updateInventories() throws Exception {
+        // Initialize the database
+        saveAndFlush(lead);
+
+        int databaseSizeBeforeUpdate = getLastLeadCountInventories();
+
+        // Update the inventories of the lead
+        Lead lead = leadRepository.findById(this.lead.getId()).get();
+
+        lead.setInventories(new HashSet<>(UPDATED_INVENTORIES));
+
+        restLeadMockMvc.perform(put("/api/leads/{id}/inventories", this.lead.getId())
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(lead.getInventories())))
+                .andExpect(status().isOk());
+
+        // Validate the Inventories in the database
+        assertThat(getLastLeadCountInventories()).isEqualTo(databaseSizeBeforeUpdate);
+        Iterable<Inventory> testInventories = getLastLead().getInventories();
+        assertThat(testInventories).containsExactlyInAnyOrder((Inventory[]) UPDATED_INVENTORIES.toArray());
+    }
+
+    @Test
+    @Transactional
+    public void updateNotValidInventories() throws Exception {
+        // Initialize the database
+        saveAndFlush(lead);
+        em.detach(lead);
+
+        int databaseSizeBeforeUpdate = getLastLeadCountInventories();
+
+        // Set the fields where params aren't valid
+        lead.setInventories(new HashSet<>(asList(
+                new Inventory(Category.ANY,"", 0, 0, 0),
+                new Inventory(null, null, -1, -1, -1)
+        )));
+
+
+        // update inventories witch fails
+        restLeadMockMvc.perform(put("/api/leads/{id}/inventories", lead.getId())
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(lead.getInventories())))
+                .andExpect(status().isBadRequest());
+
+        // Validate the Lead in the database
+        assertThat(getLastLeadCountInventories()).isEqualTo(databaseSizeBeforeUpdate);
+        Iterable<Inventory> testInventories = getLastLead().getInventories();
+        assertThat(testInventories).containsExactlyInAnyOrder((Inventory[]) DEFAULT_INVENTORIES.toArray());
+    }
+
+    @Test
+    @Transactional
+    public void updateNonExistingInventories() throws Exception {
+        int databaseSizeBeforeUpdate = getCount();
+
+        // Non existing Lead
+        lead.setId(Long.MAX_VALUE);
+
+        // update with unexisting ID fails
+        restLeadMockMvc.perform(put("/api/leads/{id}/inventories", lead.getId())
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .content(TestUtil.convertObjectToJsonBytes(lead.getInventories())))
                 .andExpect(status().isNotFound());
 
         assertThat(getCount()).isEqualTo(databaseSizeBeforeUpdate);

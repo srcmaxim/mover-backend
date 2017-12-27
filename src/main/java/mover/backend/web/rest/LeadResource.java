@@ -1,6 +1,7 @@
 package mover.backend.web.rest;
 
 import mover.backend.model.Estimate;
+import mover.backend.model.Inventory;
 import mover.backend.model.Lead;
 import mover.backend.repository.LeadRepository;
 import mover.backend.web.rest.util.ResponseUtil;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
 
 /**
  * REST controller for managing Lead.
@@ -149,6 +152,33 @@ public class LeadResource {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    /**
+     * GET  /leads/:id/inventories : Finds inventories in store by lead ID.
+     *
+     * @param id the ID of the inventories lead to return
+     * @return the ResponseEntity with status 200 (OK) and with body the inventories,
+     * or with status 404 (Not Found) if there is no lead with this ID
+     */
+    @GetMapping("/leads/{id}/inventories")
+    public  ResponseEntity<Iterable<Inventory>> findInventories(@PathVariable Long id) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * PUT  /leads/:id/inventories  : Updates lead inventories in store by lead ID.
+     *
+     * @param id the ID of the inventories lead to update
+     * @param inventories  the inventories to update
+     * @return the ResponseEntity with status 200 (OK),
+     * or with status 400 (Bad Request) if the Inventories are not valid,
+     * or with status 404 (Not Found) if there is no lead with this ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PutMapping("leads/{id}/inventories")
+    public ResponseEntity<Void> updateINventories(@PathVariable Long id, @Valid @RequestBody Collection<Inventory> inventories) throws URISyntaxException {
+        throw new UnsupportedOperationException();
     }
 }
 
