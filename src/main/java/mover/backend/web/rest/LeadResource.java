@@ -1,8 +1,6 @@
 package mover.backend.web.rest;
 
-import mover.backend.model.Estimate;
-import mover.backend.model.Inventory;
-import mover.backend.model.Lead;
+import mover.backend.model.*;
 import mover.backend.repository.LeadRepository;
 import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -190,6 +188,30 @@ public class LeadResource {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    /**
+     * GET  /leads/:id/customer : Finds customer in store by lead ID.
+     *
+     * @param id the ID of the customer lead to return
+     * @return the ResponseEntity with status 200 (OK) and with body the customer,
+     * or with status 404 (Not Found) if there is no lead with this ID
+     */
+    @GetMapping("/leads/{id}/customer")
+    public  ResponseEntity<Customer> findCustomerByLeadId(@PathVariable Long id) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * GET  /leads/:id/employees : Finds employees in store by lead ID.
+     *
+     * @param id the ID of the employees lead to return
+     * @return the ResponseEntity with status 200 (OK) and with body the employees,
+     * or with status 404 (Not Found) if there is no lead with this ID
+     */
+    @GetMapping("/leads/{id}/employees")
+    public  ResponseEntity<Iterable<Employee>> findEmployeesByLeadId(@PathVariable Long id) {
+        throw new UnsupportedOperationException();
     }
 }
 

@@ -1,10 +1,7 @@
 package mover.backend.web.rest;
 
 import mover.backend.BackendApplication;
-import mover.backend.model.Address;
-import mover.backend.model.Estimate;
-import mover.backend.model.Inventory;
-import mover.backend.model.Lead;
+import mover.backend.model.*;
 import mover.backend.model.enumeration.Category;
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
@@ -79,15 +76,21 @@ public class LeadResourceIntTest {
 
     /* INVENTORIES */
     private static final List<Inventory> DEFAULT_INVENTORIES = asList(
-            new Inventory(Category.BED, "Default estimate 1", 1, 10,100),
-            new Inventory(Category.LIVING, "Default estimate 2", 2, 20,200),
-            new Inventory(Category.OFFICE, "Default estimate 3", 3, 30,300)
+            new Inventory(Category.BED, "Default estimate 1", 1, 10, 100),
+            new Inventory(Category.LIVING, "Default estimate 2", 2, 20, 200),
+            new Inventory(Category.OFFICE, "Default estimate 3", 3, 30, 300)
     );
     private static final List<Inventory> UPDATED_INVENTORIES = asList(
-            new Inventory(Category.BED, "Updated estimate 1", 1, 10,100),
-            new Inventory(Category.LIVING, "Updated estimate 2", 2, 20,200),
-            new Inventory(Category.OFFICE, "Updated estimate 3", 3, 30,300)
+            new Inventory(Category.BED, "Updated estimate 1", 1, 10, 100),
+            new Inventory(Category.LIVING, "Updated estimate 2", 2, 20, 200),
+            new Inventory(Category.OFFICE, "Updated estimate 3", 3, 30, 300)
     );
+
+    /* ENTITIES */
+
+    public static Customer customer;
+
+    private static List<Employee> employees;
 
     @Autowired
     private LeadRepository leadRepository;
@@ -119,13 +122,13 @@ public class LeadResourceIntTest {
     }
 
     /**
-     * Create an entity for this test.
+     * Create an entities for this test.
      * <p>
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
+     * This is a method, as tests for other entities might also need it,
+     * if they test an entity which requires the entities.
      */
-    public static Lead createEntity() {
-        Lead lead = new Lead()
+    public void createEntities() {
+        lead = new Lead()
                 .setStart(DEFAULT_START)
                 .setEnd(DEFAULT_END)
                 .setType(DEFAULT_TYPE)
@@ -134,7 +137,12 @@ public class LeadResourceIntTest {
                 .setDestination(DEFAULT_DESTINATION);
         lead.getEstimates().addAll(DEFAULT_ESTIMATES);
         lead.getInventories().addAll(DEFAULT_INVENTORIES);
-        return lead;
+
+        customer = (Customer) new Customer().setFirstName("First name").setLastName("Last name").setEmail("customer@mail.com").setPhone("+111-111-111");
+        employees = asList(
+                (Employee) new Employee().setFirstName("First name 1").setLastName("Last name 1").setEmail("employee1@mail.com").setPhone("+111-111-1111"),
+                (Employee) new Employee().setFirstName("First name 2").setLastName("Last name 2").setEmail("employee2@mail.com").setPhone("+222-222-2222")
+        );
     }
 
     public Lead getLastLead() {
@@ -154,14 +162,14 @@ public class LeadResourceIntTest {
         return getLastLead().getInventories().size();
     }
 
-    public void saveAndFlush(Lead lead) {
-        em.persist(lead);
+    public void saveAndFlush(Object o) {
+        em.persist(o);
         em.flush();
     }
 
     @Before
     public void initTest() {
-        lead = createEntity();
+        createEntities();
     }
 
     @Test
@@ -556,7 +564,7 @@ public class LeadResourceIntTest {
 
         // Set the fields where params aren't valid
         lead.setInventories(new HashSet<>(asList(
-                new Inventory(Category.ANY,"", 0, 0, 0),
+                new Inventory(Category.ANY, "", 0, 0, 0),
                 new Inventory(null, null, -1, -1, -1)
         )));
 
@@ -588,5 +596,67 @@ public class LeadResourceIntTest {
                 .andExpect(status().isNotFound());
 
         assertThat(getCount()).isEqualTo(databaseSizeBeforeUpdate);
+    }
+
+    /* ENTITIES */
+
+    @Test
+    @Transactional
+    public void findCustomerByLeadId() throws Exception {
+        // Initialize the database
+        saveAndFlush(customer);
+        lead.setCustomer(customer);
+        customer.getLeads().add(lead);
+        saveAndFlush(lead);
+
+        // Get the inventories of the lead
+        restLeadMockMvc.perform(get("/api/leads/{id}/customer", lead.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.firstName").value(customer.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(customer.getLastName()))
+                .andExpect(jsonPath("$.email").value(customer.getEmail()))
+                .andExpect(jsonPath("$.phone").value(customer.getPhone()));
+    }
+
+    @Test
+    @Transactional
+    public void findNonExistingCustomerByLeadId() throws Exception {
+        // Get the customer of the lead
+        restLeadMockMvc.perform(get("/api/leads/{id}/customer", Long.MAX_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    public void findEmployeesByLeadId() throws Exception {
+        // Initialize the database
+        employees.stream().forEach(employee -> saveAndFlush(employee));
+        lead.getAssignedTos().addAll(employees);
+        employees.stream().forEach(employee -> employee.getLeads().add(lead));
+        saveAndFlush(lead);
+
+        // Get the inventories of the lead
+        restLeadMockMvc.perform(get("/api/leads/{id}/employees", lead.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+
+                .andExpect(jsonPath("$.[*].firstName").value(hasItem(employees.get(0).getFirstName())))
+                .andExpect(jsonPath("$.[*].lastName").value(hasItem(employees.get(0).getLastName())))
+                .andExpect(jsonPath("$.[*].email").value(hasItem(employees.get(0).getEmail())))
+                .andExpect(jsonPath("$.[*].phone").value(hasItem(employees.get(0).getPhone())))
+
+                .andExpect(jsonPath("$.[*].firstName").value(hasItem(employees.get(1).getFirstName())))
+                .andExpect(jsonPath("$.[*].lastName").value(hasItem(employees.get(1).getLastName())))
+                .andExpect(jsonPath("$.[*].email").value(hasItem(employees.get(1).getEmail())))
+                .andExpect(jsonPath("$.[*].phone").value(hasItem(employees.get(1).getPhone())));
+    }
+
+    @Test
+    @Transactional
+    public void findNonExistingEmployeesByLeadId() throws Exception {
+        // Get the employees of the lead
+        restLeadMockMvc.perform(get("/api/leads/{id}/employees", Long.MAX_VALUE))
+                .andExpect(status().isNotFound());
     }
 }
