@@ -1,7 +1,11 @@
 package mover.backend.web.rest;
 
 import mover.backend.BackendApplication;
+import mover.backend.model.Address;
 import mover.backend.model.Employee;
+import mover.backend.model.Lead;
+import mover.backend.model.enumeration.Status;
+import mover.backend.model.enumeration.Type;
 import mover.backend.repository.EmployeeRepository;
 import mover.backend.web.rest.advice.ExceptionAdvice;
 import org.junit.Before;
@@ -18,7 +22,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 
+import static java.util.Arrays.asList;
+import static mover.backend.web.rest.TestUtil.sameInstant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -44,6 +54,10 @@ public class EmployeeResourceIntTest {
 
     private static final String DEFAULT_EMAIL = "default-email@gmail.com";
     private static final String UPDATED_EMAIL = "updated-email@gmail.com";
+
+    /* ENTITIES */
+
+    private List<Lead> leads;
 
     @Autowired
     private EmployeeRepository employeeRepository;
@@ -76,13 +90,29 @@ public class EmployeeResourceIntTest {
      * This is a static method, as tests for other entities might also need it,
      * if they test an entity which requires the current entity.
      */
-    public static Employee createEntity() {
-        Employee employee = (Employee) new Employee()
+    public void createEntity() {
+        employee = (Employee) new Employee()
                 .setFirstName(DEFAULT_FIRST_NAME)
                 .setLastName(DEFAULT_LAST_NAME)
                 .setPhone(DEFAULT_PHONE)
                 .setEmail(DEFAULT_EMAIL);
-        return employee;
+
+        leads = asList(
+                new Lead()
+                        .setStart(LocalDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC))
+                        .setEnd(LocalDateTime.ofInstant(Instant.ofEpochMilli(100L), ZoneOffset.UTC))
+                        .setType(Type.LOCAL)
+                        .setStatus(Status.PENDING)
+                        .setOrigin(new Address("Default origin", 0D, 0D))
+                        .setDestination(new Address("Default destination", 0D, 0D)),
+                new Lead()
+                        .setStart(LocalDateTime.ofInstant(Instant.ofEpochMilli(10L), ZoneOffset.UTC))
+                        .setEnd(LocalDateTime.ofInstant(Instant.ofEpochMilli(1000L), ZoneOffset.UTC))
+                        .setType(Type.DISTANCE)
+                        .setStatus(Status.ASSIGNED)
+                        .setOrigin(new Address("Updated origin", 1D, 1D))
+                        .setDestination(new Address("Updated destination", 1D, 1D))
+        );
     }
 
     public Employee getLastEmployee() {
@@ -94,14 +124,14 @@ public class EmployeeResourceIntTest {
         return (int) employeeRepository.count();
     }
 
-    public void saveAndFlush(Employee employee) {
-        em.persist(employee);
+    public void saveAndFlush(Object o) {
+        em.persist(o);
         em.flush();
     }
 
     @Before
     public void initTest() {
-        employee = createEntity();
+        createEntity();
     }
 
     @Test
@@ -302,5 +332,46 @@ public class EmployeeResourceIntTest {
 
         // Validate the database is empty
         assertThat(getCount()).isEqualTo(databaseSizeBeforeDelete);
+    }
+
+    /* ENTITIES */
+
+    @Test
+    @Transactional
+    public void findLeadsByEmployeeId() throws Exception {
+        // Initialize the database
+        leads.forEach(this::saveAndFlush);
+        employee.getLeads().addAll(leads);
+        leads.forEach(lead -> lead.getAssignedTos().add(employee));
+        saveAndFlush(employee);
+
+        // Get the leads of the employee
+        restEmployeeMockMvc.perform(get("/api/employees/{id}/leads", employee.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+
+                .andExpect(jsonPath("$.[*].id").value(hasItem(leads.get(0).getId().intValue())))
+                .andExpect(jsonPath("$.[*].type").value(hasItem(leads.get(0).getType().toString())))
+                .andExpect(jsonPath("$.[*].start").value(hasItem(sameInstant(leads.get(0).getStart()))))
+                .andExpect(jsonPath("$.[*].end").value(hasItem(sameInstant(leads.get(0).getEnd()))))
+                .andExpect(jsonPath("$.[*].status").value(hasItem(leads.get(0).getStatus().toString())))
+                .andExpect(jsonPath("$.[*].origin.address").value(hasItem(leads.get(0).getOrigin().getAddress())))
+                .andExpect(jsonPath("$.[*].destination.address").value(hasItem(leads.get(0).getDestination().getAddress())))
+
+                .andExpect(jsonPath("$.[*].id").value(hasItem(leads.get(1).getId().intValue())))
+                .andExpect(jsonPath("$.[*].type").value(hasItem(leads.get(1).getType().toString())))
+                .andExpect(jsonPath("$.[*].start").value(hasItem(sameInstant(leads.get(1).getStart()))))
+                .andExpect(jsonPath("$.[*].end").value(hasItem(sameInstant(leads.get(1).getEnd()))))
+                .andExpect(jsonPath("$.[*].status").value(hasItem(leads.get(1).getStatus().toString())))
+                .andExpect(jsonPath("$.[*].origin.address").value(hasItem(leads.get(1).getOrigin().getAddress())))
+                .andExpect(jsonPath("$.[*].destination.address").value(hasItem(leads.get(1).getDestination().getAddress())));
+    }
+
+    @Test
+    @Transactional
+    public void findNonExistingLeadsByEmployeeId() throws Exception {
+        // Get the leads of the employee
+        restEmployeeMockMvc.perform(get("/api/employees/{id}/leads", Long.MAX_VALUE))
+                .andExpect(status().isNotFound());
     }
 }

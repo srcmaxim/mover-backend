@@ -88,9 +88,9 @@ public class LeadResourceIntTest {
 
     /* ENTITIES */
 
-    public static Customer customer;
+    private Customer customer;
 
-    private static List<Employee> employees;
+    private List<Employee> employees;
 
     @Autowired
     private LeadRepository leadRepository;
@@ -631,9 +631,9 @@ public class LeadResourceIntTest {
     @Transactional
     public void findEmployeesByLeadId() throws Exception {
         // Initialize the database
-        employees.stream().forEach(employee -> saveAndFlush(employee));
+        employees.forEach(this::saveAndFlush);
         lead.getAssignedTos().addAll(employees);
-        employees.stream().forEach(employee -> employee.getLeads().add(lead));
+        employees.forEach(employee -> employee.getLeads().add(lead));
         saveAndFlush(lead);
 
         // Get the inventories of the lead

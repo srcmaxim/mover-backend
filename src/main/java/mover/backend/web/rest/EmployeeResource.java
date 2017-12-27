@@ -1,6 +1,7 @@
 package mover.backend.web.rest;
 
 import mover.backend.model.Employee;
+import mover.backend.model.Lead;
 import mover.backend.repository.EmployeeRepository;
 import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -110,6 +111,18 @@ public class EmployeeResource {
             employeeRepository.deleteById(id);
         }
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * GET  /employees/:id/leads : Finds leads in store by employee ID.
+     *
+     * @param id the ID of the leads employee to return
+     * @return the ResponseEntity with status 200 (OK) and with body the leads,
+     * or with status 404 (Not Found) if there is no employee with this ID
+     */
+    @GetMapping("/employees/{id}/leads")
+    public  ResponseEntity<Iterable<Lead>> findLeadsByEmployeeId(@PathVariable Long id) {
+        throw new UnsupportedOperationException();
     }
 }
 

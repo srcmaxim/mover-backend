@@ -1,6 +1,7 @@
 package mover.backend.web.rest;
 
 import mover.backend.model.Customer;
+import mover.backend.model.Lead;
 import mover.backend.repository.CustomerRepository;
 import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -110,6 +111,18 @@ public class CustomerResource {
             customerRepository.deleteById(id);
         }
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * GET  /customers/:id/leads : Finds leads in store by customer ID.
+     *
+     * @param id the ID of the leads customer to return
+     * @return the ResponseEntity with status 200 (OK) and with body the leads,
+     * or with status 404 (Not Found) if there is no customer with this ID
+     */
+    @GetMapping("/customers/{id}/leads")
+    public  ResponseEntity<Iterable<Lead>> findLeadsByCustomerId(@PathVariable Long id) {
+        throw new UnsupportedOperationException();
     }
 }
 
