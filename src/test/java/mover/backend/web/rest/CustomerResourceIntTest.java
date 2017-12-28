@@ -7,6 +7,7 @@ import mover.backend.model.Lead;
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
 import mover.backend.repository.CustomerRepository;
+import mover.backend.repository.LeadRepository;
 import mover.backend.web.rest.advice.ExceptionAdvice;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,8 +60,13 @@ public class CustomerResourceIntTest {
 
     private List<Lead> leads;
 
+    private Lead lead;
+
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private LeadRepository leadRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -78,7 +84,7 @@ public class CustomerResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        CustomerResource customerResource = new CustomerResource(customerRepository);
+        CustomerResource customerResource = new CustomerResource(customerRepository, leadRepository);
         this.restCustomerMockMvc = MockMvcBuilders.standaloneSetup(customerResource)
                 .setControllerAdvice(exceptionTranslator)
                 .setMessageConverters(jacksonMessageConverter).build();
@@ -113,10 +119,17 @@ public class CustomerResourceIntTest {
                         .setOrigin(new Address("Updated origin", 1D, 1D))
                         .setDestination(new Address("Updated destination", 1D, 1D))
         );
+
+        lead = leads.get(0);
     }
 
     public Customer getLastCustomer() {
         return (Customer) em.createQuery("select l from Customer l order by l.id desc")
+                .setMaxResults(1).getSingleResult();
+    }
+
+    public Lead getLastLead() {
+        return (Lead) em.createQuery("select l from Lead l order by l.id desc")
                 .setMaxResults(1).getSingleResult();
     }
 
@@ -372,6 +385,42 @@ public class CustomerResourceIntTest {
     public void findNonExistingLeadsByCustomerId() throws Exception {
         // Get the leads of the customer
         restCustomerMockMvc.perform(get("/api/customers/{id}/leads", Long.MAX_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    public void updateConnectionLeadByCustomerId() throws Exception {
+        // Initialize the database
+        saveAndFlush(customer);
+        saveAndFlush(lead);
+        em.detach(customer);
+        em.detach(lead);
+
+        // Put the leads to the customer
+        restCustomerMockMvc.perform(put("/api/customers/{customerId}/leads/{leadId}", customer.getId(), lead.getId()))
+                .andExpect(status().isOk());
+
+        // Validate connection between Customer and Lead
+        lead = getLastLead();
+        customer = getLastCustomer();
+        assertThat(customer.getLeads()).contains(lead);
+        assertThat(lead.getCustomer()).isEqualTo(customer);
+    }
+
+    @Test
+    @Transactional
+    public void updateConnectionNonExistingLeadByCustomerId() throws Exception {
+        // Put the leads to the customer
+        restCustomerMockMvc.perform(put("/api/customers/{customerId}/leads/{leadId}", 1, Long.MAX_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    public void updateConnectionLeadByNonExistingCustomerId() throws Exception {
+        // Put the leads to the customer
+        restCustomerMockMvc.perform(put("/api/customers/{customerId}/leads/{leadId}", Long.MAX_VALUE, 1))
                 .andExpect(status().isNotFound());
     }
 }

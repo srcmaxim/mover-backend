@@ -3,6 +3,7 @@ package mover.backend.web.rest;
 import mover.backend.model.Customer;
 import mover.backend.model.Lead;
 import mover.backend.repository.CustomerRepository;
+import mover.backend.repository.LeadRepository;
 import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +30,12 @@ public class CustomerResource {
 
     private final CustomerRepository customerRepository;
 
+    private final LeadRepository leadRepository;
+
     @Autowired
-    public CustomerResource(CustomerRepository customerRepository) {
+    public CustomerResource(CustomerRepository customerRepository, LeadRepository leadRepository) {
         this.customerRepository = customerRepository;
+        this.leadRepository = leadRepository;
     }
 
     /**
@@ -113,6 +117,8 @@ public class CustomerResource {
         return ResponseEntity.ok().build();
     }
 
+    /* ENTITIES */
+
     /**
      * GET  /customers/:id/leads : Finds leads in store by customer ID.
      *
@@ -126,6 +132,19 @@ public class CustomerResource {
         Optional<Iterable<Lead>> leads = customerRepository.findById(id)
                 .map(Customer::getLeads);
         return ResponseUtil.wrapOrNotFound(leads);
+    }
+
+    /**
+     * PUT  /customers/{customerId}/leads/{leadId} : Updates connection lead in store by customer ID.
+     *
+     * @param customerId the ID of the customer to connect
+     * @param leadId the ID of the lead to connect
+     * @return the ResponseEntity with status 200 (OK),
+     * or with status 404 (Not Found) if there is no customer or lead with these IDs
+     */
+    @PutMapping("/customers/{customerId}/leads/{leadId}")
+    public ResponseEntity<Customer> updateConnectionLeadByCustomerId(@PathVariable Long customerId, @PathVariable Long leadId) {
+        throw new UnsupportedOperationException();
     }
 }
 

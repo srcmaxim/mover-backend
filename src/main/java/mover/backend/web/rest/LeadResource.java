@@ -114,6 +114,8 @@ public class LeadResource {
         return ResponseEntity.ok().build();
     }
 
+    /* EMBEDDED */
+
     /**
      * GET  /leads/:id/estimates : Finds estimates in store by lead ID.
      *
@@ -189,6 +191,8 @@ public class LeadResource {
         }
         return ResponseEntity.notFound().build();
     }
+
+    /* ENTITIES */
 
     /**
      * GET  /leads/:id/customer : Finds customer in store by lead ID.

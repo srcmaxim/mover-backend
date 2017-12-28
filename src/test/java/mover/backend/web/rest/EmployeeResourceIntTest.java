@@ -7,6 +7,7 @@ import mover.backend.model.Lead;
 import mover.backend.model.enumeration.Status;
 import mover.backend.model.enumeration.Type;
 import mover.backend.repository.EmployeeRepository;
+import mover.backend.repository.LeadRepository;
 import mover.backend.web.rest.advice.ExceptionAdvice;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,8 +60,13 @@ public class EmployeeResourceIntTest {
 
     private List<Lead> leads;
 
+    private Lead lead;
+
     @Autowired
     private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private LeadRepository leadRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -78,7 +84,7 @@ public class EmployeeResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        EmployeeResource employeeResource = new EmployeeResource(employeeRepository);
+        EmployeeResource employeeResource = new EmployeeResource(employeeRepository, leadRepository);
         this.restEmployeeMockMvc = MockMvcBuilders.standaloneSetup(employeeResource)
                 .setControllerAdvice(exceptionTranslator)
                 .setMessageConverters(jacksonMessageConverter).build();
@@ -113,10 +119,17 @@ public class EmployeeResourceIntTest {
                         .setOrigin(new Address("Updated origin", 1D, 1D))
                         .setDestination(new Address("Updated destination", 1D, 1D))
         );
+
+        lead = leads.get(0);
     }
 
     public Employee getLastEmployee() {
         return (Employee) em.createQuery("select l from Employee l order by l.id desc")
+                .setMaxResults(1).getSingleResult();
+    }
+
+    public Lead getLastLead() {
+        return (Lead) em.createQuery("select l from Lead l order by l.id desc")
                 .setMaxResults(1).getSingleResult();
     }
 
@@ -372,6 +385,42 @@ public class EmployeeResourceIntTest {
     public void findNonExistingLeadsByEmployeeId() throws Exception {
         // Get the leads of the employee
         restEmployeeMockMvc.perform(get("/api/employees/{id}/leads", Long.MAX_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    public void updateConnectionLeadByEmployeeId() throws Exception {
+        // Initialize the database
+        saveAndFlush(employee);
+        saveAndFlush(lead);
+        em.detach(employee);
+        em.detach(lead);
+
+        // Put the leads to the employee
+        restEmployeeMockMvc.perform(put("/api/employees/{employeeId}/leads/{leadId}", employee.getId(), lead.getId()))
+                .andExpect(status().isOk());
+
+        // Validate connection between Employee and Lead
+        lead = getLastLead();
+        employee = getLastEmployee();
+        assertThat(employee.getLeads()).contains(lead);
+        assertThat(lead.getAssignedTos()).contains(employee);
+    }
+
+    @Test
+    @Transactional
+    public void updateConnectionNonExistingLeadByEmployeeId() throws Exception {
+        // Put the leads to the employee
+        restEmployeeMockMvc.perform(put("/api/employees/{employeeId}/leads/{leadId}", 1, Long.MAX_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    public void updateConnectionLeadByNonExistingEmployeeId() throws Exception {
+        // Put the leads to the employee
+        restEmployeeMockMvc.perform(put("/api/employees/{employeeId}/leads/{leadId}", Long.MAX_VALUE, 1))
                 .andExpect(status().isNotFound());
     }
 }

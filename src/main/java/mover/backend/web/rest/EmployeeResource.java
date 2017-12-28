@@ -3,6 +3,7 @@ package mover.backend.web.rest;
 import mover.backend.model.Employee;
 import mover.backend.model.Lead;
 import mover.backend.repository.EmployeeRepository;
+import mover.backend.repository.LeadRepository;
 import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +30,12 @@ public class EmployeeResource {
 
     private final EmployeeRepository employeeRepository;
 
+    private final LeadRepository leadRepository;
+
     @Autowired
-    public EmployeeResource(EmployeeRepository employeeRepository) {
+    public EmployeeResource(EmployeeRepository employeeRepository, LeadRepository leadRepository) {
         this.employeeRepository = employeeRepository;
+        this.leadRepository = leadRepository;
     }
 
     /**
@@ -113,6 +117,8 @@ public class EmployeeResource {
         return ResponseEntity.ok().build();
     }
 
+    /* ENTITIES */
+
     /**
      * GET  /employees/:id/leads : Finds leads in store by employee ID.
      *
@@ -126,6 +132,19 @@ public class EmployeeResource {
         Optional<Iterable<Lead>> leads = employeeRepository.findById(id)
                 .map(Employee::getLeads);
         return ResponseUtil.wrapOrNotFound(leads);
+    }
+
+    /**
+     * PUT  /employees/{employeeId}/leads/{leadId} : Updates connection lead in store by employee ID.
+     *
+     * @param employeeId the ID of the employee to connect
+     * @param leadId the ID of the lead to connect
+     * @return the ResponseEntity with status 200 (OK),
+     * or with status 404 (Not Found) if there is no employee or lead with these IDs
+     */
+    @PutMapping("/employees/{employeeId}/leads/{leadId}")
+    public ResponseEntity<Employee> updateConnectionLeadByEmployeeId(@PathVariable Long employeeId, @PathVariable Long leadId) {
+        throw new UnsupportedOperationException();
     }
 }
 
