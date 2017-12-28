@@ -423,4 +423,40 @@ public class EmployeeResourceIntTest {
         restEmployeeMockMvc.perform(put("/api/employees/{employeeId}/leads/{leadId}", Long.MAX_VALUE, 1))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @Transactional
+    public void deleteConnectionLeadByEmployeeId() throws Exception {
+        // Initialize the database
+        lead.getAssignedTos().add(employee);
+        employee.getLeads().add(lead);
+        saveAndFlush(employee);
+        saveAndFlush(lead);
+
+        // Delete the lead and the employee connection
+        restEmployeeMockMvc.perform(delete("/api/employees/{employeeId}/leads/{leadId}", employee.getId(), lead.getId()))
+                .andExpect(status().isOk());
+
+        // Validate connection between Employee and Lead
+        lead = getLastLead();
+        employee = getLastEmployee();
+        assertThat(employee.getLeads()).doesNotContain(lead);
+        assertThat(lead.getAssignedTos()).doesNotContain(employee);
+    }
+
+    @Test
+    @Transactional
+    public void deleteConnectionNonExistingLeadByEmployeeId() throws Exception {
+        // Delete the lead and the employee connection
+        restEmployeeMockMvc.perform(delete("/api/employees/{employeeId}/leads/{leadId}", 1, Long.MAX_VALUE))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Transactional
+    public void deleteConnectionLeadByNonExistingEmployeeId() throws Exception {
+        // Delete the lead and the employee connection
+        restEmployeeMockMvc.perform(delete("/api/employees/{employeeId}/leads/{leadId}", Long.MAX_VALUE, 1))
+                .andExpect(status().isOk());
+    }
 }

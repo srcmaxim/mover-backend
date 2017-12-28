@@ -1,6 +1,7 @@
 package mover.backend.web.rest;
 
 import mover.backend.model.Customer;
+import mover.backend.model.Employee;
 import mover.backend.model.Lead;
 import mover.backend.repository.CustomerRepository;
 import mover.backend.repository.LeadRepository;
@@ -157,6 +158,19 @@ public class CustomerResource {
         });
         return connected[0] ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
+    }
+
+    /**
+     * DELETE  /customers/{customerId}/leads/{leadId} : Deletes connection lead in store by customer ID.
+     *
+     * @param customerId the ID of the customer to delete
+     * @param leadId the ID of the lead to delete
+     * @return the ResponseEntity with status 200 (OK),
+     * or with status 404 (Not Found) if there is no customer or lead with these IDs
+     */
+    @DeleteMapping("/customers/{customerId}/leads/{leadId}")
+    public ResponseEntity<Employee> deleteConnectionLeadBCustomerId(@PathVariable Long customerId, @PathVariable Long leadId) {
+        throw new UnsupportedOperationException();
     }
 }
 

@@ -158,5 +158,18 @@ public class EmployeeResource {
         return connected[0] ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
     }
+
+    /**
+     * DELETE  /employees/{employeeId}/leads/{leadId} : Deletes connection lead in store by employee ID.
+     *
+     * @param employeeId the ID of the employee to delete
+     * @param leadId the ID of the lead to delete
+     * @return the ResponseEntity with status 200 (OK),
+     * or with status 404 (Not Found) if there is no employee or lead with these IDs
+     */
+    @DeleteMapping("/employees/{employeeId}/leads/{leadId}")
+    public ResponseEntity<Employee> deleteConnectionLeadByEmployeeId(@PathVariable Long employeeId, @PathVariable Long leadId) {
+        throw new UnsupportedOperationException();
+    }
 }
 

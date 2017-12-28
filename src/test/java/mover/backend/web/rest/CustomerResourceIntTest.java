@@ -423,4 +423,40 @@ public class CustomerResourceIntTest {
         restCustomerMockMvc.perform(put("/api/customers/{customerId}/leads/{leadId}", Long.MAX_VALUE, 1))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @Transactional
+    public void deleteConnectionLeadByCustomerId() throws Exception {
+        // Initialize the database
+        lead.setCustomer(customer);
+        customer.getLeads().add(lead);
+        saveAndFlush(customer);
+        saveAndFlush(lead);
+
+        // Delete the lead and the customer connection
+        restCustomerMockMvc.perform(delete("/api/customers/{customerId}/leads/{leadId}", customer.getId(), lead.getId()))
+                .andExpect(status().isOk());
+
+        // Validate connection between Customer and Lead
+        lead = getLastLead();
+        customer = getLastCustomer();
+        assertThat(customer.getLeads()).doesNotContain(lead);
+        assertThat(lead.getCustomer()).isNull();
+    }
+
+    @Test
+    @Transactional
+    public void deleteConnectionNonExistingLeadByCustomerId() throws Exception {
+        // Delete the lead and the customer connection
+        restCustomerMockMvc.perform(delete("/api/customers/{customerId}/leads/{leadId}", 1, Long.MAX_VALUE))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Transactional
+    public void deleteConnectionLeadByNonExistingCustomerId() throws Exception {
+        // Delete the lead and the customer connection
+        restCustomerMockMvc.perform(delete("/api/customers/{customerId}/leads/{leadId}", Long.MAX_VALUE, 1))
+                .andExpect(status().isOk());
+    }
 }
