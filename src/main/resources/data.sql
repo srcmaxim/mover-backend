@@ -14,13 +14,13 @@ insert into employee (id, firstname, lastname, email, phone) values (default, 'A
 insert into employee (id, firstname, lastname, email, phone) values (default, 'Andrey', 'Arshavin', 'andrey.arshavin@yandex.com', '+324-723-1523');
 insert into employee (id, firstname, lastname, email, phone) values (default, 'Bast', 'Dost', 'bast.dost@yahoo.com', '+678-936-9080');
 
-insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 1, '2017-12-15T13:30:00', '2017-12-15T13:30:00', 'LOCAL', 'ASSIGNED', '123, Brick st., LA', '123, Mac st., LA');
-insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 2, '2017-12-15T13:30:00', '2017-12-15T13:30:00', 'DISTANCE', 'CONVERTED', '27, Tree st., LA', '413, Apple st., LA');
-insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 3, '2017-12-15T13:30:00', '2017-12-15T13:30:00', 'DISTANCE', 'CLOSED', '27, Cherry st., LA', '413, Villon st., LA');
-insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 4, '2017-12-15T13:30:00', '2017-12-15T13:30:00', 'DISTANCE', 'CONVERTED', '42, Marshmallow st., LA', '15, Cherry st., LA');
-insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 5, '2017-12-15T13:30:00', '2017-12-15T13:30:00', 'DISTANCE', 'CONVERTED', '27, Pine st., LA', '413, Orange st., LA');
-insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 6, '2017-12-15T13:30:00', '2017-12-15T13:30:00', 'LOCAL', 'ASSIGNED', '15, Glass st., LA', '73, Sand st., LA');
-insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 7, '2017-12-15T13:30:00', '2017-12-15T13:30:00', 'DISTANCE', 'CONVERTED', '27, Tree st., LA', '413, Oak st., LA');
+insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 1, '2000-01-15T13:30:00', '2001-01-15T13:30:00', 'LOCAL', 'ASSIGNED', '123, Brick st., LA', '123, Mac st., LA');
+insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 2, '2000-02-15T13:30:00', '2001-02-15T13:30:00', 'DISTANCE', 'CONVERTED', '27, Tree st., LA', '413, Apple st., LA');
+insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 3, '2000-03-15T13:30:00', '2001-03-15T13:30:00', 'DISTANCE', 'CLOSED', '27, Cherry st., LA', '413, Villon st., LA');
+insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 4, '2000-04-15T13:30:00', '2001-04-15T13:30:00', 'DISTANCE', 'CONVERTED', '42, Marshmallow st., LA', '15, Cherry st., LA');
+insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 5, '2000-05-15T13:30:00', '2001-05-15T13:30:00', 'DISTANCE', 'CONVERTED', '27, Pine st., LA', '413, Orange st., LA');
+insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 6, '2000-06-15T13:30:00', '2001-06-15T13:30:00', 'LOCAL', 'ASSIGNED', '15, Glass st., LA', '73, Sand st., LA');
+insert into lead (id, customer_id, start, end, type, status, origin_address, destination_address) values (default, 7, '2000-07-15T13:30:00', '2001-07-15T13:30:00', 'DISTANCE', 'CONVERTED', '27, Tree st., LA', '413, Oak st., LA');
 
 insert into lead_employee (lead_id, employee_id) values (1, 1);
 insert into lead_employee (lead_id, employee_id) values (2, 2);

@@ -144,7 +144,19 @@ public class CustomerResource {
      */
     @PutMapping("/customers/{customerId}/leads/{leadId}")
     public ResponseEntity<Customer> updateConnectionLeadByCustomerId(@PathVariable Long customerId, @PathVariable Long leadId) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to update Customer - Lead connection: {} - {}", customerId, leadId);
+        final boolean[] connected = {false};
+        customerRepository.findById(customerId).ifPresent(customer -> {
+            leadRepository.findById(leadId).ifPresent(lead -> {
+                lead.setCustomer(customer);
+                customer.getLeads().add(lead);
+                leadRepository.save(lead);
+                customerRepository.save(customer);
+                connected[0] = true;
+            });
+        });
+        return connected[0] ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
     }
 }
 

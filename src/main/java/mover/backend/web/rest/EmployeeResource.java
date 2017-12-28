@@ -144,7 +144,19 @@ public class EmployeeResource {
      */
     @PutMapping("/employees/{employeeId}/leads/{leadId}")
     public ResponseEntity<Employee> updateConnectionLeadByEmployeeId(@PathVariable Long employeeId, @PathVariable Long leadId) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to update Employee - Lead connection: {} - {}", employeeId, leadId);
+        final boolean[] connected = {false};
+        employeeRepository.findById(employeeId).ifPresent(employee -> {
+            leadRepository.findById(leadId).ifPresent(lead -> {
+                lead.getAssignedTos().add(employee);
+                employee.getLeads().add(lead);
+                leadRepository.save(lead);
+                employeeRepository.save(employee);
+                connected[0] = true;
+            });
+        });
+        return connected[0] ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
     }
 }
 
