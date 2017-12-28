@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -112,8 +113,13 @@ public class CustomerResource {
     @DeleteMapping("/customers/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
         log.debug("REST request to delete Customer : {}", id);
-        if (id != null && customerRepository.existsById(id)) {
-            customerRepository.deleteById(id);
+        if (id != null) {
+            customerRepository.findById(id)
+                    .ifPresent(customer -> {
+                        customer.getLeads().forEach(lead -> lead.setCustomer(null));
+                        customer.setLeads(Collections.emptySet());
+                        customerRepository.delete(customer);
+                    });
         }
         return ResponseEntity.ok().build();
     }
