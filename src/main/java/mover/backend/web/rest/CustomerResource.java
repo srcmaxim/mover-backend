@@ -170,7 +170,16 @@ public class CustomerResource {
      */
     @DeleteMapping("/customers/{customerId}/leads/{leadId}")
     public ResponseEntity<Employee> deleteConnectionLeadBCustomerId(@PathVariable Long customerId, @PathVariable Long leadId) {
-        throw new UnsupportedOperationException();
+        log.debug("REST request to delete Employee - Lead connection: {} - {}", customerId, leadId);
+        customerRepository.findById(customerId).ifPresent(customer -> {
+            leadRepository.findById(leadId).ifPresent(lead -> {
+                lead.setCustomer(null);
+                customer.getLeads().remove(lead);
+                leadRepository.save(lead);
+                customerRepository.save(customer);
+            });
+        });
+        return ResponseEntity.ok().build();
     }
 }
 
