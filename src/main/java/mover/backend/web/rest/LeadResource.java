@@ -13,6 +13,7 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -108,8 +109,15 @@ public class LeadResource {
     @DeleteMapping("/leads/{id}")
     public ResponseEntity<Void> deleteLead(@PathVariable Long id) {
         log.debug("REST request to delete Lead : {}", id);
-        if (id != null && leadRepository.existsById(id)) {
-            leadRepository.deleteById(id);
+        if (id != null) {
+            leadRepository.findById(id).ifPresent(lead -> {
+                Optional.ofNullable(lead.getCustomer())
+                        .ifPresent(customer -> customer.getLeads().remove(lead));
+                lead.setCustomer(null);
+                lead.getAssignedTos().forEach(employee -> employee.getLeads().remove(lead));
+                lead.setAssignedTos(Collections.emptySet());
+                leadRepository.delete(lead);
+            });
         }
         return ResponseEntity.ok().build();
     }
