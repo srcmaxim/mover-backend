@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * REST controller for managing Lead.
@@ -150,13 +147,13 @@ public class LeadResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PutMapping("leads/{id}/estimates")
-    public ResponseEntity<Void> updateEstimates(@PathVariable Long id, @Valid @RequestBody Collection<Estimate> estimates) throws URISyntaxException {
+    public ResponseEntity<Void> updateEstimates(@PathVariable Long id, @Valid @RequestBody Set<Estimate> estimates) throws URISyntaxException {
         log.debug("REST request to update Estimates of Lead: {}", id);
         if (id != null && leadRepository.existsById(id)) {
-            HashSet<Estimate> newEstimates = new HashSet<>();
-            newEstimates.addAll(estimates);
-            leadRepository.findById(id)
-                    .ifPresent(lead -> lead.setEstimates(newEstimates));
+            leadRepository.findById(id).ifPresent((Lead lead) -> {
+                lead.setEstimates(estimates);
+                leadRepository.save(lead);
+            });
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
@@ -188,13 +185,13 @@ public class LeadResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PutMapping("leads/{id}/inventories")
-    public ResponseEntity<Void> updateINventories(@PathVariable Long id, @Valid @RequestBody Collection<Inventory> inventories) throws URISyntaxException {
+    public ResponseEntity<Void> updateInventories(@PathVariable Long id, @Valid @RequestBody Set<Inventory> inventories) throws URISyntaxException {
         log.debug("REST request to update Inventories of Lead: {}", id);
         if (id != null && leadRepository.existsById(id)) {
-            HashSet<Inventory> newInventories = new HashSet<>();
-            newInventories.addAll(inventories);
-            leadRepository.findById(id)
-                    .ifPresent(lead -> lead.setInventories(newInventories));
+            leadRepository.findById(id).ifPresent((Lead lead) -> {
+                lead.setInventories(inventories);
+                leadRepository.save(lead);
+            });
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
