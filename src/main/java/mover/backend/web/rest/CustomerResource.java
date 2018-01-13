@@ -5,6 +5,7 @@ import mover.backend.model.Employee;
 import mover.backend.model.Lead;
 import mover.backend.repository.CustomerRepository;
 import mover.backend.repository.LeadRepository;
+import mover.backend.web.rest.util.HeaderUtil;
 import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,10 +65,13 @@ public class CustomerResource {
     public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) throws URISyntaxException {
         log.debug("REST request to save Customer : {}", customer);
         if (customer.getId() != null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest()
+                    .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new customer cannot already have an ID"))
+                    .build();
         }
         Customer result = customerRepository.save(customer);
         return ResponseEntity.created(new URI("/api/customers/" + result.getId()))
+                .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
                 .body(result);
     }
 
@@ -85,7 +89,9 @@ public class CustomerResource {
         log.debug("REST request to update Customer : {}", customer);
         if (customer.getId() != null && customerRepository.existsById(customer.getId())) {
             customerRepository.save(customer);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok()
+                    .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, customer.getId().toString()))
+                    .build();
         }
         return ResponseEntity.notFound().build();
     }
@@ -121,7 +127,9 @@ public class CustomerResource {
                         customerRepository.delete(customer);
                     });
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok()
+                .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString()))
+                .build();
     }
 
     /* ENTITIES */
@@ -162,7 +170,10 @@ public class CustomerResource {
                 connected[0] = true;
             });
         });
-        return connected[0] ? ResponseEntity.ok().build()
+        return connected[0]
+                ? ResponseEntity.ok()
+                        .headers(HeaderUtil.createConnectionEntityAlert(ENTITY_NAME, leadId.toString()))
+                        .build()
                 : ResponseEntity.notFound().build();
     }
 
@@ -185,7 +196,9 @@ public class CustomerResource {
                 customerRepository.save(customer);
             });
         });
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok()
+                .headers(HeaderUtil.deleteConnectionEntityAlert(ENTITY_NAME, leadId.toString()))
+                .build();
     }
 }
 

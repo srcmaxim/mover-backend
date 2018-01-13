@@ -4,6 +4,7 @@ import mover.backend.model.Employee;
 import mover.backend.model.Lead;
 import mover.backend.repository.EmployeeRepository;
 import mover.backend.repository.LeadRepository;
+import mover.backend.web.rest.util.HeaderUtil;
 import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,10 +64,13 @@ public class EmployeeResource {
     public ResponseEntity<Employee> createEmployee(@Valid @RequestBody Employee employee) throws URISyntaxException {
         log.debug("REST request to save Employee : {}", employee);
         if (employee.getId() != null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest()
+                    .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new employee cannot already have an ID"))
+                    .build();
         }
         Employee result = employeeRepository.save(employee);
         return ResponseEntity.created(new URI("/api/employees/" + result.getId()))
+                .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
                 .body(result);
     }
 
@@ -84,7 +88,9 @@ public class EmployeeResource {
         log.debug("REST request to update Employee : {}", employee);
         if (employee.getId() != null && employeeRepository.existsById(employee.getId())) {
             employeeRepository.save(employee);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok()
+                    .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, employee.getId().toString()))
+                    .build();
         }
         return ResponseEntity.notFound().build();
     }
@@ -120,7 +126,9 @@ public class EmployeeResource {
                         employeeRepository.delete(employee);
                     });
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok()
+                .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString()))
+                .build();
     }
 
     /* ENTITIES */
@@ -161,7 +169,10 @@ public class EmployeeResource {
                 connected[0] = true;
             });
         });
-        return connected[0] ? ResponseEntity.ok().build()
+        return connected[0]
+                ? ResponseEntity.ok()
+                        .headers(HeaderUtil.createConnectionEntityAlert(ENTITY_NAME, leadId.toString()))
+                        .build()
                 : ResponseEntity.notFound().build();
     }
 
@@ -184,7 +195,9 @@ public class EmployeeResource {
                 employeeRepository.save(employee);
             });
         });
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok()
+                .headers(HeaderUtil.deleteConnectionEntityAlert(ENTITY_NAME, leadId.toString()))
+                .build();
     }
 }
 

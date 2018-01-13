@@ -67,9 +67,11 @@ public class Lead {
     private Address destination;
 
     @ElementCollection
+    @JsonIgnore
     private Set<Estimate> estimates = new HashSet<>();
 
     @ElementCollection
+    @JsonIgnore
     private Set<Inventory> inventories = new HashSet<>();
 
     @ManyToOne

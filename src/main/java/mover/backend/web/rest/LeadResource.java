@@ -2,6 +2,7 @@ package mover.backend.web.rest;
 
 import mover.backend.model.*;
 import mover.backend.repository.LeadRepository;
+import mover.backend.web.rest.util.HeaderUtil;
 import mover.backend.web.rest.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ public class LeadResource {
     private final Logger log = LoggerFactory.getLogger(LeadResource.class);
 
     private static final String ENTITY_NAME = "lead";
+    private static final String EMBEDDED_ESTIMATE = "estimate";
+    private static final String EMBEDDED_INVENTORY = "inventory";
 
     private final LeadRepository leadRepository;
 
@@ -57,10 +60,13 @@ public class LeadResource {
     public ResponseEntity<Lead> createLead(@Valid @RequestBody Lead lead) throws URISyntaxException {
         log.debug("REST request to save Lead : {}", lead);
         if (lead.getId() != null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest()
+                    .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new lead cannot already have an ID"))
+                    .build();
         }
         Lead result = leadRepository.save(lead);
         return ResponseEntity.created(new URI("/api/leads/" + result.getId()))
+                .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
                 .body(result);
     }
 
@@ -78,7 +84,9 @@ public class LeadResource {
         log.debug("REST request to update Lead : {}", lead);
         if (lead.getId() != null && leadRepository.existsById(lead.getId())) {
             leadRepository.save(lead);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok()
+                    .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, lead.getId().toString()))
+                    .build();
         }
         return ResponseEntity.notFound().build();
     }
@@ -116,7 +124,9 @@ public class LeadResource {
                 leadRepository.delete(lead);
             });
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok()
+                .headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString()))
+                .build();
     }
 
     /* EMBEDDED */
@@ -154,7 +164,9 @@ public class LeadResource {
                 lead.setEstimates(estimates);
                 leadRepository.save(lead);
             });
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok()
+                    .headers(HeaderUtil.createEntityUpdateAlert(EMBEDDED_ESTIMATE, null))
+                    .build();
         }
         return ResponseEntity.notFound().build();
     }
@@ -194,7 +206,9 @@ public class LeadResource {
             });
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.notFound()
+                .headers(HeaderUtil.createEntityUpdateAlert(EMBEDDED_INVENTORY, null))
+                .build();
     }
 
     /* ENTITIES */
