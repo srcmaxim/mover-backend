@@ -48,3 +48,10 @@ insert into lead_inventories (lead_id, category, name, quantity, weight, volume)
 insert into lead_inventories (lead_id, category, name, quantity, weight, volume) values (5, 'LIVING', 'Audio system',  4, 5, 5);
 insert into lead_inventories (lead_id, category, name, quantity, weight, volume) values (6, 'LIVING', 'Shelves', 4, 75, 25);
 insert into lead_inventories (lead_id, category, name, quantity, weight, volume) values (7, 'OFFICE', 'Lamp', 1, 20, 15);
+
+insert into user (id, firstname, lastname, email, phone, username, password) values (default, 'Harry', 'Kane', 'harry-kane@yo.com', '+234-473-8453', 'harry.kane', 'harry.kane');
+insert into user (id, firstname, lastname, email, phone, username, password) values (default, 'Tony', 'Kroos', 'tony-kroos@yo.com', '+937-267-8263', 'tony.kroos', 'tony.kroos');
+
+insert into role (user_id, name) values (1, 'USER');
+insert into role (user_id, name) values (2, 'USER');
+insert into role (user_id, name) values (2, 'ADMIN');
