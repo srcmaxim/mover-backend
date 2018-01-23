@@ -5,5 +5,11 @@ package mover.backend.security.auth.jwt.extractor;
  * representation of JWT Token.
  */
 public interface TokenExtractor {
-    public String extract(String payload);
+
+    /**
+     * Extracts token from header.
+     * @param header an value of Authentication HTTP header
+     * @return JSON web token
+     */
+    String extract(String header);
 }

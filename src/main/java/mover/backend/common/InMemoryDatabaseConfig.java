@@ -6,7 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- *
+ * Configuration of in-memory db.
+ * Additional registers H2 console
  */
 @Configuration
 public class InMemoryDatabaseConfig {

@@ -6,7 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.List;
 
 /**
- *
+ * UserContext holds info about user. Works in JWT.
  */
 public class UserContext {
     private final String username;

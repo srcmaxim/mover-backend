@@ -19,7 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- *
+ * AjaxAwareAuthenticationFailureHandler class is our
+ * custom implementation of {@link AuthenticationFailureHandler} interface.
+ * Responsibility of this class is make a response with ErrorResponse ViewModel.
  */
 @Component
 public class AjaxAwareAuthenticationFailureHandler implements AuthenticationFailureHandler {

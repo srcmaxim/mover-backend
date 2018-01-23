@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * RefreshToken
+ * RefreshToken is used for refreshing raw token.
  */
 @SuppressWarnings("unchecked")
 public class RefreshToken implements JwtToken {
@@ -23,13 +23,13 @@ public class RefreshToken implements JwtToken {
     /**
      * Creates and validates Refresh token 
      * 
-     * @param token
-     * @param signingKey
+     * @param token a token for refreshing
+     * @param signingKey a claims as string
      * 
-     * @throws BadCredentialsException
-     * @throws JwtExpiredTokenException
+     * @throws BadCredentialsException if token not valid
+     * @throws JwtExpiredTokenException if token has expired
      * 
-     * @return
+     * @return RefreshToken a raw token
      */
     public static Optional<RefreshToken> create(RawAccessJwtToken token, String signingKey) {
         Jws<Claims> claims = token.parseClaims(signingKey);

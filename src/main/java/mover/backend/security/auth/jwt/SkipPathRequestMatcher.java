@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * SkipPathRequestMatcher
+ * JwtTokenAuthenticationProcessingFilter filter is
+ * configured to skip following endpoints: /api/auth/login and /api/auth/token.
  */
 public class SkipPathRequestMatcher implements RequestMatcher {
     private OrRequestMatcher matchers;

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 /**
- * Mock implementation.
+ * Service for the User entity.
  */
 @Service
 public class DatabaseUserService implements UserService {

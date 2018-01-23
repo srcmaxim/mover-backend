@@ -4,11 +4,9 @@ import mover.backend.security.model.token.JwtToken;
 import org.springframework.security.core.AuthenticationException;
 
 /**
- *
+ * Uses when JWT iat + exp > Date.now().
  */
 public class JwtExpiredTokenException extends AuthenticationException {
-    private static final long serialVersionUID = -5959543783324224864L;
-    
     private JwtToken token;
 
     public JwtExpiredTokenException(String msg) {

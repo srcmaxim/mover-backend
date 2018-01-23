@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Model intended to be used for AJAX based authentication.
  */
-
 public class LoginRequest {
     private String username;
     private String password;

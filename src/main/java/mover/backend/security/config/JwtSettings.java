@@ -4,6 +4,9 @@ import mover.backend.security.model.token.JwtToken;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Properties holder for Auth.
+ */
 @Configuration
 @ConfigurationProperties(prefix = "demo.security.jwt")
 public class JwtSettings {

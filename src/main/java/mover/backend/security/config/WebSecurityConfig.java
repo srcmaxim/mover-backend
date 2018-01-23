@@ -26,7 +26,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * WebSecurityConfig
+ * WebSecurityConfig configures:
+ * {@link AjaxLoginProcessingFilter}
+ * {@link JwtTokenAuthenticationProcessingFilter}
+ * {@link AuthenticationManager}
+ * and also configures patterns to define protected/unprotected API endpoints.
  */
 @Configuration
 @EnableWebSecurity
@@ -95,8 +99,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .exceptionHandling()
             .authenticationEntryPoint(this.authenticationEntryPoint)
 
-            .and() // Enable iFrame in H2 console
-                .headers().frameOptions().disable()
+            .and()
+                .headers().frameOptions().disable() // Enable iFrame in H2 console
 
             .and()
                 .sessionManagement()

@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import java.util.Date;
 
 /**
- *
+ * Error ViewModel
  */
 public class ErrorResponse {
     // HTTP Response Status Code

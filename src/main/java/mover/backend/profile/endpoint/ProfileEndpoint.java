@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- *
+ * ProfileEndpoint is the ViewModel for user information
  */
 @RestController
 public class ProfileEndpoint {

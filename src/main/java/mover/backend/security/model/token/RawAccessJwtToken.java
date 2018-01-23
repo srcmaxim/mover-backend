@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 
+/**
+ * RawAccessJwtToken is used for authentication.
+ */
 public class RawAccessJwtToken implements JwtToken {
     private static Logger logger = LoggerFactory.getLogger(RawAccessJwtToken.class);
             

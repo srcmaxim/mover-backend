@@ -32,6 +32,11 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         this.jwtSettings = jwtSettings;
     }
 
+    /**
+     * Uses JwtAuthenticationToken to collect information from given user JWT.
+     *
+     * @param authentication user identification information
+     */
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         RawAccessJwtToken rawAccessToken = (RawAccessJwtToken) authentication.getCredentials();

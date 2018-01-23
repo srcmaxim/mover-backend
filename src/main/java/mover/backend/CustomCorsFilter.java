@@ -7,7 +7,8 @@ import org.springframework.web.filter.CorsFilter;
 import java.util.Arrays;
 
 /**
- * CustomCorsFilter
+ * CustomCorsFilter register CORS only for /api/** endpoint
+ * and allows some HTTP methods.
  */
 public class CustomCorsFilter extends CorsFilter {
 

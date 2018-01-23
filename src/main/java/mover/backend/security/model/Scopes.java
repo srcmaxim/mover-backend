@@ -1,7 +1,7 @@
 package mover.backend.security.model;
 
 /**
- * Scopes
+ * Scopes uses for refresh token.
  */
 public enum Scopes {
     REFRESH_TOKEN;

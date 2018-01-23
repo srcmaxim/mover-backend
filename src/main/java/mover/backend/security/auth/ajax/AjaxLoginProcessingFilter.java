@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- *
+ * AjaxLoginProcessingFilter provides custom processing of Ajax authentication requests.
  */
 public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingFilter {
     private static Logger logger = LoggerFactory.getLogger(AjaxLoginProcessingFilter.class);
@@ -32,7 +32,7 @@ public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingF
     private final AuthenticationFailureHandler failureHandler;
 
     private final ObjectMapper objectMapper;
-    
+
     public AjaxLoginProcessingFilter(String defaultProcessUrl, AuthenticationSuccessHandler successHandler,
                                      AuthenticationFailureHandler failureHandler, ObjectMapper mapper) {
         super(defaultProcessUrl);
@@ -41,18 +41,33 @@ public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingF
         this.objectMapper = mapper;
     }
 
+    /**
+     * Attempts to authenticate user with username and password {@link LoginRequest}.
+     * Upon successful validation of the JSON payload authentication
+     * logic is delegated to {@link AjaxAuthenticationProvider}.
+     *
+     * @param request  Servlet request
+     * @param response Servlet responce
+     * @return Authentication if there is such user.
+     * Under the hood uses callback for successful or unsuccessful authentication.
+     *
+     * @throws AuthMethodNotSupportedException if there is aren't POST method with XMLHttpRequest header
+     * @throws AuthenticationException         if username of password not provided
+     *
+     * @see LoginRequest
+     */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
         if (!HttpMethod.POST.name().equals(request.getMethod()) || !WebUtil.isAjax(request)) {
-            if(logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {
                 logger.debug("Authentication method not supported. Request method: " + request.getMethod());
             }
             throw new AuthMethodNotSupportedException("Authentication method not supported");
         }
 
         LoginRequest loginRequest = objectMapper.readValue(request.getReader(), LoginRequest.class);
-        
+
         if (StringUtils.isBlank(loginRequest.getUsername()) || StringUtils.isBlank(loginRequest.getPassword())) {
             throw new AuthenticationServiceException("Username or Password not provided");
         }

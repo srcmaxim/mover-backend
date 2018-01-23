@@ -21,7 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * AjaxAwareAuthenticationSuccessHandler class is our
+ * custom implementation of {@link AuthenticationSuccessHandler} interface.
+ * Responsibility of this class is to add JSON payload containing
+ * JWT Access and Refresh tokens into the HTTP response body.
  */
 @Component
 public class AjaxAwareAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
@@ -55,8 +58,7 @@ public class AjaxAwareAuthenticationSuccessHandler implements AuthenticationSucc
 
     /**
      * Removes temporary authentication-related data which may have been stored
-     * in the session during the authentication process..
-     * 
+     * in the session during the authentication process.
      */
     protected final void clearAuthenticationAttributes(HttpServletRequest request) {
         HttpSession session = request.getSession(false);

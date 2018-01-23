@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- *
+ * Used for authentication of an user.
  */
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {

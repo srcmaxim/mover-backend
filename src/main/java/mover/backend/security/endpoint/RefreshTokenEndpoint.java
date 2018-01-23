@@ -19,8 +19,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,9 +31,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * RefreshTokenEndpoint
+ * RefreshTokenEndpoint uses for refreshing access token.
  */
-@RestController
+@RestController("/api")
 public class RefreshTokenEndpoint {
     @Autowired
     private JwtTokenFactory tokenFactory;
@@ -46,8 +45,13 @@ public class RefreshTokenEndpoint {
     private TokenVerifier tokenVerifier;
     @Autowired
     @Qualifier("jwtHeaderTokenExtractor") private TokenExtractor tokenExtractor;
-    
-    @RequestMapping(value="/api/auth/token", method= RequestMethod.GET, produces={ MediaType.APPLICATION_JSON_VALUE })
+
+    /**
+     * GET  /auth/token : refreshes token
+     *
+     * @return the JwtToken
+     */
+    @GetMapping(value="/auth/token", produces={ MediaType.APPLICATION_JSON_VALUE })
     public @ResponseBody
     JwtToken refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String tokenPayload = tokenExtractor.extract(request.getHeader(WebSecurityConfig.AUTHENTICATION_HEADER_NAME));

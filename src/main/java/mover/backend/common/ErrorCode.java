@@ -3,7 +3,7 @@ package mover.backend.common;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- *
+ * Main exception codes used during authentication.
  */
 public enum ErrorCode {
     GLOBAL(2),

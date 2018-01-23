@@ -1,6 +1,7 @@
 package mover.backend.security.auth.ajax;
 
 import mover.backend.model.User;
+import mover.backend.profile.endpoint.ProfileEndpoint;
 import mover.backend.security.model.UserContext;
 import mover.backend.service.DatabaseUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- *
+ * AjaxAuthenticationProvider performs authentication in application.
  */
 @Component
 public class AjaxAuthenticationProvider implements AuthenticationProvider {
@@ -34,6 +35,16 @@ public class AjaxAuthenticationProvider implements AuthenticationProvider {
         this.encoder = encoder;
     }
 
+    /**
+     * The main responsibilities are:
+     * 1. Verify user credentials against database, LDAP or some other system which holds the user data.
+     * 2. Create {@link UserContext} and populate it with user data you need (in our case just username and user privileges).
+     * The {@link UserContext} is used in {@link ProfileEndpoint} to request information about user.
+     *
+     * @param authentication holds credentials and principals of the user.
+     * @return
+     * @throws AuthenticationException if username and password do not match.
+     */
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Assert.notNull(authentication, "No authentication data provided");
