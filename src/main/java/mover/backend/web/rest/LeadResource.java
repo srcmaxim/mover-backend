@@ -165,7 +165,7 @@ public class LeadResource {
                 leadRepository.save(lead);
             });
             return ResponseEntity.ok()
-                    .headers(HeaderUtil.createEntityUpdateAlert(EMBEDDED_ESTIMATE, null))
+                    .headers(HeaderUtil.createEntityUpdateAlert(EMBEDDED_ESTIMATE, id.toString()))
                     .build();
         }
         return ResponseEntity.notFound().build();
@@ -207,7 +207,7 @@ public class LeadResource {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound()
-                .headers(HeaderUtil.createEntityUpdateAlert(EMBEDDED_INVENTORY, null))
+                .headers(HeaderUtil.createEntityUpdateAlert(EMBEDDED_INVENTORY, id.toString()))
                 .build();
     }
 
