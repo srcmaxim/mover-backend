@@ -1,4 +1,4 @@
-package mover.backend.security;
+package mover.backend.service;
 
 import mover.backend.model.User;
 

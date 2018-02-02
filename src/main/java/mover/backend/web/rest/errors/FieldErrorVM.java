@@ -10,5 +10,4 @@ public class FieldErrorVM {
     private final String objectName;
     private final String field;
     private final String message;
-
 }

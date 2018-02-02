@@ -3,7 +3,7 @@ package mover.backend.security.model.token;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import mover.backend.security.config.JwtSettings;
+import mover.backend.config.JwtSettings;
 import mover.backend.security.model.Scopes;
 import mover.backend.security.model.UserContext;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +30,7 @@ public class JwtTokenFactory {
     }
 
     /**
-     * Factory method for issuing new JWT Tokens.
+     * Factory method for issuing new JWT.
      * 
      * @param userContext
      * @return
@@ -60,6 +60,12 @@ public class JwtTokenFactory {
         return new AccessJwtToken(token, claims);
     }
 
+    /**
+     * Factory method for issuing new JWT with ROLE_REFRESH authority.
+     *
+     * @param userContext
+     * @return
+     */
     public JwtToken createRefreshToken(UserContext userContext) {
         if (StringUtils.isBlank(userContext.getUsername())) {
             throw new IllegalArgumentException("Cannot create JWT Token without username");

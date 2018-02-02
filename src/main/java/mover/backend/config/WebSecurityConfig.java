@@ -1,4 +1,4 @@
-package mover.backend.security.config;
+package mover.backend.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mover.backend.CustomCorsFilter;

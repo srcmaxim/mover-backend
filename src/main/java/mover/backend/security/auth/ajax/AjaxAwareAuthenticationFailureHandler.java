@@ -1,10 +1,10 @@
 package mover.backend.security.auth.ajax;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import mover.backend.web.rest.errors.ErrorCode;
-import mover.backend.web.rest.errors.ErrorResponse;
 import mover.backend.security.exceptions.AuthMethodNotSupportedException;
 import mover.backend.security.exceptions.JwtExpiredTokenException;
+import mover.backend.web.rest.errors.ErrorConstants;
+import mover.backend.web.rest.errors.ErrorVM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,7 +21,7 @@ import java.io.IOException;
 /**
  * AjaxAwareAuthenticationFailureHandler class is our
  * custom implementation of {@link AuthenticationFailureHandler} interface.
- * Responsibility of this class is make a response with ErrorResponse ViewModel.
+ * Responsibility of this class is make a response with {@link ErrorVM}.
  */
 @Component
 public class AjaxAwareAuthenticationFailureHandler implements AuthenticationFailureHandler {
@@ -40,13 +40,13 @@ public class AjaxAwareAuthenticationFailureHandler implements AuthenticationFail
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		
 		if (e instanceof BadCredentialsException) {
-			mapper.writeValue(response.getWriter(), ErrorResponse.of("Invalid username or password", ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+			mapper.writeValue(response.getWriter(), new ErrorVM(ErrorConstants.ERR_INVALID_CREDENTIALS));
 		} else if (e instanceof JwtExpiredTokenException) {
-			mapper.writeValue(response.getWriter(), ErrorResponse.of("Token has expired", ErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
+			mapper.writeValue(response.getWriter(), new ErrorVM(ErrorConstants.ERR_TOKEN_EXPIRED));
 		} else if (e instanceof AuthMethodNotSupportedException) {
-		    mapper.writeValue(response.getWriter(), ErrorResponse.of(e.getMessage(), ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+		    mapper.writeValue(response.getWriter(), new ErrorVM(ErrorConstants.ERR_METHOD_NOT_SUPPORTED));
 		}
 
-		mapper.writeValue(response.getWriter(), ErrorResponse.of("Authentication failed", ErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+		mapper.writeValue(response.getWriter(), new ErrorVM(ErrorConstants.ERR_VALIDATION_FAILED));
 	}
 }

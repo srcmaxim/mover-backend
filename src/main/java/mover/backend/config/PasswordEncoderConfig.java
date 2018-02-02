@@ -1,4 +1,4 @@
-package mover.backend.security.config;
+package mover.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

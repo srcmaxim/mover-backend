@@ -13,7 +13,6 @@ public class ErrorVM {
 
     private final String message;
     private final String description;
-
     private List<FieldErrorVM> fieldErrors;
 
     public ErrorVM(String message) {

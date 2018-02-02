@@ -3,7 +3,7 @@ package mover.backend.security.auth.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import mover.backend.security.auth.JwtAuthenticationToken;
-import mover.backend.security.config.JwtSettings;
+import mover.backend.config.JwtSettings;
 import mover.backend.security.model.UserContext;
 import mover.backend.security.model.token.JwtToken;
 import mover.backend.security.model.token.RawAccessJwtToken;

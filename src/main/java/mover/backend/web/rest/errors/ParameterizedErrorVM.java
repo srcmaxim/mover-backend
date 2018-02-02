@@ -14,5 +14,4 @@ public class ParameterizedErrorVM {
 
     private final String message;
     private final Map<String, String> paramMap;
-
 }

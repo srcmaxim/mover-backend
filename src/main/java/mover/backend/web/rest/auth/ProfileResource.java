@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 @RequestMapping("/api")
 public class ProfileResource {
-    @RequestMapping(value="/me", method= RequestMethod.GET)
-    public @ResponseBody
-    UserContext get(JwtAuthenticationToken token) {
+
+    @GetMapping(value="/whoami")
+    public @ResponseBody UserContext whoami(JwtAuthenticationToken token) {
         return (UserContext) token.getPrincipal();
     }
 }

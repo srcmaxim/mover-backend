@@ -2,7 +2,7 @@ package mover.backend.security.auth.jwt;
 
 import mover.backend.security.auth.JwtAuthenticationToken;
 import mover.backend.security.auth.jwt.extractor.TokenExtractor;
-import mover.backend.security.config.WebSecurityConfig;
+import mover.backend.config.WebSecurityConfig;
 import mover.backend.security.model.token.RawAccessJwtToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;

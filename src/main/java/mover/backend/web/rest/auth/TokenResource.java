@@ -1,11 +1,11 @@
 package mover.backend.web.rest.auth;
 
 import mover.backend.model.User;
-import mover.backend.security.UserService;
+import mover.backend.service.UserService;
 import mover.backend.security.auth.jwt.extractor.TokenExtractor;
 import mover.backend.security.auth.jwt.verifier.TokenVerifier;
-import mover.backend.security.config.JwtSettings;
-import mover.backend.security.config.WebSecurityConfig;
+import mover.backend.config.JwtSettings;
+import mover.backend.config.WebSecurityConfig;
 import mover.backend.security.exceptions.InvalidJwtToken;
 import mover.backend.security.model.UserContext;
 import mover.backend.security.model.token.JwtToken;
@@ -45,7 +45,7 @@ public class TokenResource {
      * GET  /auth/token : refreshes token
      * uses Header name defined in {@link WebSecurityConfig#AUTHENTICATION_HEADER_NAME}.
      *
-     * @return the JwtTokene
+     * @return the {@link JwtToken}
      */
     @GetMapping("/auth/token")
     public JwtToken refreshToken(@RequestHeader(WebSecurityConfig.AUTHENTICATION_HEADER_NAME) String bearerToken) {

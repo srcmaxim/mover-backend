@@ -1,4 +1,4 @@
-package mover.backend.security.config;
+package mover.backend.config;
 
 import mover.backend.security.model.token.JwtToken;
 import org.springframework.boot.context.properties.ConfigurationProperties;

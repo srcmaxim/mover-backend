@@ -2,7 +2,6 @@ package mover.backend.service;
 
 import mover.backend.model.User;
 import mover.backend.repository.UserRepository;
-import mover.backend.security.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
