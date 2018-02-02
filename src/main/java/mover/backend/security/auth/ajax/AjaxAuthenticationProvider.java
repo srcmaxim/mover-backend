@@ -1,7 +1,7 @@
 package mover.backend.security.auth.ajax;
 
 import mover.backend.model.User;
-import mover.backend.profile.endpoint.ProfileEndpoint;
+import mover.backend.web.rest.auth.ProfileResource;
 import mover.backend.security.model.UserContext;
 import mover.backend.service.DatabaseUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class AjaxAuthenticationProvider implements AuthenticationProvider {
      * The main responsibilities are:
      * 1. Verify user credentials against database, LDAP or some other system which holds the user data.
      * 2. Create {@link UserContext} and populate it with user data you need (in our case just username and user privileges).
-     * The {@link UserContext} is used in {@link ProfileEndpoint} to request information about user.
+     * The {@link UserContext} is used in {@link ProfileResource} to request information about user.
      *
      * @param authentication holds credentials and principals of the user.
      * @return

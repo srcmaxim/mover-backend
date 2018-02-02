@@ -1,7 +1,6 @@
 package mover.backend.security.auth.ajax;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import mover.backend.common.WebUtil;
 import mover.backend.security.exceptions.AuthMethodNotSupportedException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,7 +58,7 @@ public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingF
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
-        if (!HttpMethod.POST.name().equals(request.getMethod()) || !WebUtil.isAjax(request)) {
+        if (!HttpMethod.POST.name().equals(request.getMethod())) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Authentication method not supported. Request method: " + request.getMethod());
             }

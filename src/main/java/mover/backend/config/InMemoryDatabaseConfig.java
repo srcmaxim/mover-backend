@@ -1,4 +1,4 @@
-package mover.backend.common;
+package mover.backend.config;
 
 import org.h2.server.web.WebServlet;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;

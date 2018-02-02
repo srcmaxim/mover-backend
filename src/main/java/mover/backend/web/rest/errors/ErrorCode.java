@@ -1,4 +1,4 @@
-package mover.backend.common;
+package mover.backend.web.rest.errors;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

@@ -1,4 +1,4 @@
-package mover.backend.security.endpoint;
+package mover.backend.web.rest.auth;
 
 import mover.backend.model.User;
 import mover.backend.security.UserService;
@@ -14,27 +14,22 @@ import mover.backend.security.model.token.RawAccessJwtToken;
 import mover.backend.security.model.token.RefreshToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * RefreshTokenEndpoint uses for refreshing access token.
+ * TokenResource uses for refreshing access token.
  */
-@RestController("/api")
-public class RefreshTokenEndpoint {
+@RestController
+@CrossOrigin
+@RequestMapping("/api")
+public class TokenResource {
     @Autowired
     private JwtTokenFactory tokenFactory;
     @Autowired
@@ -48,15 +43,15 @@ public class RefreshTokenEndpoint {
 
     /**
      * GET  /auth/token : refreshes token
+     * uses Header name defined in {@link WebSecurityConfig#AUTHENTICATION_HEADER_NAME}.
      *
-     * @return the JwtToken
+     * @return the JwtTokene
      */
-    @GetMapping(value="/auth/token", produces={ MediaType.APPLICATION_JSON_VALUE })
-    public @ResponseBody
-    JwtToken refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String tokenPayload = tokenExtractor.extract(request.getHeader(WebSecurityConfig.AUTHENTICATION_HEADER_NAME));
-        
-        RawAccessJwtToken rawToken = new RawAccessJwtToken(tokenPayload);
+    @GetMapping("/auth/token")
+    public JwtToken refreshToken(@RequestHeader(WebSecurityConfig.AUTHENTICATION_HEADER_NAME) String bearerToken) {
+        String encodedToken = tokenExtractor.extract(bearerToken);
+
+        RawAccessJwtToken rawToken = new RawAccessJwtToken(encodedToken);
         RefreshToken refreshToken = RefreshToken.create(rawToken, jwtSettings.getTokenSigningKey()).orElseThrow(() -> new InvalidJwtToken());
 
         String jti = refreshToken.getJti();

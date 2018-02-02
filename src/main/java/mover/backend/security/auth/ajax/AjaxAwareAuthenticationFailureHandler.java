@@ -1,8 +1,8 @@
 package mover.backend.security.auth.ajax;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import mover.backend.common.ErrorCode;
-import mover.backend.common.ErrorResponse;
+import mover.backend.web.rest.errors.ErrorCode;
+import mover.backend.web.rest.errors.ErrorResponse;
 import mover.backend.security.exceptions.AuthMethodNotSupportedException;
 import mover.backend.security.exceptions.JwtExpiredTokenException;
 import org.springframework.beans.factory.annotation.Autowired;
